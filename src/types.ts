@@ -2,6 +2,8 @@ export interface Hadith {
   number: number;
   arab: string;
   id: string;
+  // untuk Riyadhus Shalihin: HTML asli
+  html?: string;
 }
 
 export interface BookInfo {
@@ -10,6 +12,8 @@ export interface BookInfo {
   arabicName: string;
   available: number;
   file: string;
+  // khusus riyadush: multi-file
+  isRiyadush?: boolean;
 }
 
 export const BOOKS: Record<string, BookInfo> = {
@@ -22,6 +26,24 @@ export const BOOKS: Record<string, BookInfo> = {
   ahmad: { id: "ahmad", name: "Musnad Ahmad", arabicName: "مسند أحمد", available: 4305, file: "ahmad.json" },
   darimi: { id: "darimi", name: "Sunan Darimi", arabicName: "سنن الدارمي", available: 2949, file: "darimi.json" },
   malik: { id: "malik", name: "Muwatta Malik", arabicName: "موطأ مالك", available: 1587, file: "malik.json" },
+  "riyadush-shalihin": {
+    id: "riyadush-shalihin",
+    name: "Riyadhus Shalihin",
+    arabicName: "رياض الصالحين",
+    available: 372,
+    file: "riyadush-shalihin",
+    isRiyadush: true,
+  },
 };
+
+export const BOOK_ALIASES: Record<string, string> = {
+  "riyadush-sholihin": "riyadush-shalihin",
+  "riyadhus-shalihin": "riyadush-shalihin",
+  "riyadhus-sholihin": "riyadush-shalihin",
+};
+
+export function normalizeBookId(id: string): string {
+  return BOOK_ALIASES[id] || id;
+}
 
 export const BOOK_IDS = Object.keys(BOOKS);

@@ -1,7 +1,7 @@
 import { Hono } from "hono";
 import { cors } from "hono/cors";
 import { logger } from "hono/logger";
-import { BOOKS, BOOK_IDS } from "./types.js";
+import { BOOKS, BOOK_IDS, normalizeBookId } from "./types.js";
 import { getBookData, getHadithByNumber } from "./data.js";
 
 const app = new Hono();
@@ -16,9 +16,9 @@ app.get("/", (c) => {
   const wantsHtml = accept.includes("text/html");
 
   const payload = {
-    message: "API Hadis Indonesia & Arab - 9 Kitab Utama",
+    message: "API Hadis Indonesia & Arab - 10 Kitab Utama",
     description:
-      "API REST gratis, tanpa API key, untuk mengakses 38.102 hadis dari 9 kitab utama (Kutubut Tis'ah) lengkap dengan teks Arab dan terjemahan Indonesia. Cocok untuk aplikasi mobile, web, bot Telegram/WhatsApp, atau pembelajaran.",
+      "API REST gratis, tanpa API key, untuk mengakses 38.474 hadis & bab dari 10 kitab utama (9 Kutubut Tis'ah + Riyadhus Shalihin) lengkap dengan teks Arab dan terjemahan Indonesia. Cocok untuk aplikasi mobile, web, bot Telegram/WhatsApp, atau pembelajaran.",
     by: "Hanif Abdurrohim",
     version: "1.0.0",
     base_url: baseUrl,
@@ -50,7 +50,7 @@ app.get("/", (c) => {
       {
         method: "GET",
         path: "/books",
-        description: "Daftar 9 kitab + jumlah hadis",
+        description: "Daftar 10 kitab + jumlah hadis & bab",
         example: `${baseUrl}/books`,
       },
       {
@@ -94,8 +94,8 @@ app.get("/", (c) => {
       {
         method: "GET",
         path: "/random",
-        description: "Hadis acak dari 9 kitab (atau filter ?book=)",
-        examples: [`${baseUrl}/random`, `${baseUrl}/random?book=tirmidzi`],
+        description: "Hadis acak dari 10 kitab (atau filter ?book=)",
+        examples: [`${baseUrl}/random`, `${baseUrl}/random?book=riyadush-shalihin`],
       },
     ],
     pagination_guide: {
@@ -197,8 +197,8 @@ app.get("/", (c) => {
 </head>
 <body>
 <header>
-  <h1>📚 API Hadis - 9 Kitab Utama</h1>
-  <p class="by">By - <strong>Hanif Abdurrohim</strong> • v1.0.0 • ${payload.total_hadith.toLocaleString("id-ID")} hadis • <a href="https://github.com/dextryayers" target="_blank">github.com/dextryayers</a></p>
+  <h1>📚 API Hadis - 10 Kitab Utama</h1>
+  <p class="by">By - <strong>Hanif Abdurrohim</strong> • v1.0.0 • ${payload.total_hadith.toLocaleString("id-ID")} hadis & bab • 10 kitab (9 + Riyadhus) • <a href="https://github.com/dextryayers" target="_blank">github.com/dextryayers</a></p>
   <p>${payload.description}</p>
   <div><span class="badge">REST</span><span class="badge">JSON</span><span class="badge">CORS</span><span class="badge">No API Key</span><span class="badge">Vercel Ready</span></div>
 </header>
@@ -210,7 +210,7 @@ app.get("/", (c) => {
 
 <h2>⚡ Quick Start - 3 Langkah Langsung Jalan</h2>
 <ol>
-  <li><b>Lihat daftar kitab:</b> <a href="${baseUrl}/books" target="_blank">${baseUrl}/books</a> → dapat 9 ID kitab</li>
+  <li><b>Lihat daftar kitab:</b> <a href="${baseUrl}/books" target="_blank">${baseUrl}/books</a> → dapat 10 ID kitab (9 + Riyadhus)</li>
   <li><b>Ambil 1 hadis:</b> <a href="${baseUrl}/books/bukhari/1" target="_blank">${baseUrl}/books/bukhari/1</a> → hadis Bukhari no 1</li>
   <li><b>Cari hadis:</b> <a href="${baseUrl}/books/bukhari/search?q=wudhu" target="_blank">${baseUrl}/books/bukhari/search?q=wudhu</a> → cari kata "wudhu"</li>
 </ol>
@@ -219,7 +219,7 @@ app.get("/", (c) => {
   <b>Base URL Production:</b> <code>${baseUrl}</code> • <b>Lokal:</b> <code>http://localhost:3000</code>
 </div>
 
-<h2>📖 Daftar Kitab (9 Kitab / Kutubut Tis'ah)</h2>
+<h2>📖 Daftar Kitab (10 Kitab: 9 Kutubut Tis'ah + Riyadhus Shalihin)</h2>
 <table>
   <tr><th>ID (pakai ini)</th><th>Nama Kitab</th><th>Jumlah</th><th>Coba Klik</th></tr>
   ${booksHtml}
@@ -335,7 +335,7 @@ fetch('${baseUrl}/books/bukhari?range=1-10').then(r=>r.json()).then(console.log)
     <div id="u-book-wrap" style="min-width:160px">
       <label style="font-size:12px; font-weight:bold; color:#0f766e">Kitab (id)</label>
       <select id="u-book" style="width:100%; padding:10px; border:1px solid #e7e5e4; border-radius:8px; margin-top:4px">
-        <option value="bukhari">bukhari (6638)</option><option value="muslim">muslim (4930)</option><option value="abu-daud">abu-daud (4419)</option><option value="tirmidzi">tirmidzi (3625)</option><option value="nasai">nasai (5364)</option><option value="ibnu-majah">ibnu-majah (4285)</option><option value="ahmad">ahmad (4305)</option><option value="darimi">darimi (2949)</option><option value="malik">malik (1587)</option>
+        <option value="bukhari">bukhari (6638)</option><option value="muslim">muslim (4930)</option><option value="abu-daud">abu-daud (4419)</option><option value="tirmidzi">tirmidzi (3625)</option><option value="nasai">nasai (5364)</option><option value="ibnu-majah">ibnu-majah (4285)</option><option value="ahmad">ahmad (4305)</option><option value="darimi">darimi (2949)</option><option value="malik">malik (1587)</option><option value="riyadush-shalihin">riyadush-shalihin (372 bab)</option>
       </select>
     </div>
     <div id="u-num-wrap" style="display:none; min-width:110px">
@@ -356,6 +356,7 @@ fetch('${baseUrl}/books/bukhari?range=1-10').then(r=>r.json()).then(console.log)
     <button onclick="quick('m500')" style="background:#f0fdfa; border:1px solid #99f6e4; padding:5px 10px; border-radius:999px; cursor:pointer; font-size:12px">Muslim #500</button>
     <button onclick="quick('searchWudhu')" style="background:#fef3c7; border:1px solid #fcd34d; padding:5px 10px; border-radius:999px; cursor:pointer; font-size:12px">Search wudhu</button>
     <button onclick="quick('searchPuasa')" style="background:#fef3c7; border:1px solid #fcd34d; padding:5px 10px; border-radius:999px; cursor:pointer; font-size:12px">Search puasa (all)</button>
+    <button onclick="quick('riyadush1')" style="background:#ede9fe; border:1px solid #c4b5fd; padding:5px 10px; border-radius:999px; cursor:pointer; font-size:12px">Riyadush Bab 1</button>
     <button onclick="quick('random')" style="background:#ecfdf5; border:1px solid #a7f3d0; padding:5px 10px; border-radius:999px; cursor:pointer; font-size:12px">🎲 Random</button>
   </div>
 
@@ -485,6 +486,7 @@ function quick(type){
   if(type==='m500'){ set('u-endpoint','/books/{id}/{number}'); set('u-book','muslim'); set('u-num','500'); }
   if(type==='searchWudhu'){ set('u-endpoint','/books/{id}/search'); set('u-book','bukhari'); set('u-q','wudhu'); }
   if(type==='searchPuasa'){ set('u-endpoint','/search'); set('u-q','puasa'); set('u-limit','5'); }
+  if(type==='riyadush1'){ set('u-endpoint','/books/{id}/{number}'); set('u-book','riyadush-shalihin'); set('u-num','1'); }
   if(type==='random'){ set('u-endpoint','/books/{id}/random'); set('u-book','bukhari'); }
   onEndpointChange(); updatePreview(); testUniversal();
 }
@@ -653,7 +655,8 @@ app.get("/search", (c) => {
 
 // Random hadith
 app.get("/random", (c) => {
-  const bookParam = c.req.query("book");
+  const bookParamRaw = c.req.query("book");
+  const bookParam = bookParamRaw ? normalizeBookId(bookParamRaw) : undefined;
   const bookId = bookParam && BOOKS[bookParam] ? bookParam : BOOK_IDS[Math.floor(Math.random() * BOOK_IDS.length)];
   const data = getBookData(bookId);
   const random = data[Math.floor(Math.random() * data.length)];
@@ -664,10 +667,11 @@ app.get("/random", (c) => {
 
 // GET /books/:book  -> full or paginated
 app.get("/books/:book", (c) => {
-  const bookId = c.req.param("book");
+  const bookIdRaw = c.req.param("book");
+  const bookId = normalizeBookId(bookIdRaw);
   const book = BOOKS[bookId];
   if (!book) {
-    return c.json({ error: `Kitab tidak ditemukan: ${bookId}`, available: BOOK_IDS }, 404);
+    return c.json({ error: `Kitab tidak ditemukan: ${bookIdRaw}`, available: BOOK_IDS }, 404);
   }
 
   const data = getBookData(bookId);
@@ -745,8 +749,9 @@ app.get("/books/:book", (c) => {
 
 // GET /books/:book/search?q=
 app.get("/books/:book/search", (c) => {
-  const bookId = c.req.param("book");
-  if (!BOOKS[bookId]) return c.json({ error: "Kitab tidak ditemukan" }, 404);
+  const bookIdRaw = c.req.param("book");
+  const bookId = normalizeBookId(bookIdRaw);
+  if (!BOOKS[bookId]) return c.json({ error: `Kitab tidak ditemukan: ${bookIdRaw}` }, 404);
   const q = c.req.query("q");
   if (!q || q.trim().length < 2) return c.json({ error: "query param 'q' minimal 2 karakter" }, 400);
   const lowerQ = q.toLowerCase();
@@ -766,8 +771,9 @@ app.get("/books/:book/search", (c) => {
 
 // GET /books/:book/random
 app.get("/books/:book/random", (c) => {
-  const bookId = c.req.param("book");
-  if (!BOOKS[bookId]) return c.json({ error: "Kitab tidak ditemukan" }, 404);
+  const bookIdRaw = c.req.param("book");
+  const bookId = normalizeBookId(bookIdRaw);
+  if (!BOOKS[bookId]) return c.json({ error: `Kitab tidak ditemukan: ${bookIdRaw}` }, 404);
   const data = getBookData(bookId);
   const random = data[Math.floor(Math.random() * data.length)];
   return c.json({ book: bookId, data: random });
@@ -775,9 +781,10 @@ app.get("/books/:book/random", (c) => {
 
 // GET /books/:book/:number  -> single hadith
 app.get("/books/:book/:number", (c) => {
-  const bookId = c.req.param("book");
+  const bookIdRaw = c.req.param("book");
+  const bookId = normalizeBookId(bookIdRaw);
   const numStr = c.req.param("number");
-  if (!BOOKS[bookId]) return c.json({ error: "Kitab tidak ditemukan" }, 404);
+  if (!BOOKS[bookId]) return c.json({ error: `Kitab tidak ditemukan: ${bookIdRaw}` }, 404);
   const num = parseInt(numStr);
   if (isNaN(num)) return c.json({ error: "number harus angka" }, 400);
   const hadith = getHadithByNumber(bookId, num);
