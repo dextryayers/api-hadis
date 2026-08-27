@@ -10,6 +10,9 @@
     "start": "node dist/src/server.js"
   },
   "keywords": [],
+  "allowScripts": {
+    "esbuild": true
+  },
   "dependencies": {
     "@hono/node-server": "^2.1.1",
     "hono": "^4.13.5",
