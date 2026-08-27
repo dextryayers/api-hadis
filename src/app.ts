@@ -9,23 +9,188 @@ const app = new Hono();
 app.use("*", cors());
 app.use("*", logger());
 
-// Root info
+// Root info - lengkap + By Hanif (HTML untuk browser, JSON untuk API)
 app.get("/", (c) => {
-  return c.json({
-    message: "API Hadis - 9 Kitab",
+  const baseUrl = new URL(c.req.url).origin;
+  const accept = c.req.header("accept") || "";
+  const wantsHtml = accept.includes("text/html");
+
+  const payload = {
+    message: "API Hadis Indonesia & Arab - 9 Kitab Utama",
+    description:
+      "API REST untuk mengakses 38.102 hadis dari 9 kitab utama (Kutubut Tis'ah) lengkap dengan teks Arab dan terjemahan Indonesia. Data bersumber dari hadis shahih & sunan. Siap pakai untuk aplikasi mobile, web, atau bot.",
+    by: "Hanif Abdurrohim",
     version: "1.0.0",
-    endpoints: {
-      books: "/books",
-      book_detail: "/books/{id}  e.g. /books/bukhari",
-      book_paginated: "/books/{id}?page=1&limit=20  or ?range=1-10",
-      hadith_detail: "/books/{id}/{number}  e.g. /books/bukhari/1",
-      search: "/books/{id}/search?q=niat",
-      random: "/books/{id}/random  or /random?book=bukhari",
-      all_books_search: "/search?q=niat",
-    },
-    available_books: BOOK_IDS,
+    base_url: baseUrl,
     total_hadith: Object.values(BOOKS).reduce((a, b) => a + b.available, 0),
-  });
+    available_books: BOOK_IDS.map((id) => ({
+      id,
+      name: BOOKS[id].name,
+      arabicName: BOOKS[id].arabicName,
+      available: BOOKS[id].available,
+      example: `${baseUrl}/books/${id}`,
+    })),
+    endpoints: [
+      {
+        method: "GET",
+        path: "/",
+        description: "Info API & dokumentasi (halaman ini)",
+        example: `${baseUrl}/`,
+      },
+      {
+        method: "GET",
+        path: "/books",
+        description: "Daftar 9 kitab + jumlah hadis",
+        example: `${baseUrl}/books`,
+      },
+      {
+        method: "GET",
+        path: "/books/{id}",
+        description: "Tampilkan hadis per kitab (full kitab dengan pagination)",
+        params: "id: bukhari | muslim | abu-daud | tirmidzi | nasai | ibnu-majah | ahmad | darimi | malik",
+        query: "page (default 1), limit (default 20, max 100), range (contoh 1-50)",
+        examples: [
+          `${baseUrl}/books/bukhari`,
+          `${baseUrl}/books/muslim?page=2&limit=20`,
+          `${baseUrl}/books/bukhari?range=1-10`,
+          `${baseUrl}/books/nasai?range=100-120`,
+        ],
+      },
+      {
+        method: "GET",
+        path: "/books/{id}/{number}",
+        description: "Detail 1 hadis berdasarkan nomor",
+        example: `${baseUrl}/books/bukhari/1`,
+      },
+      {
+        method: "GET",
+        path: "/books/{id}/search",
+        description: "Cari hadis di kitab tertentu (search teks terjemahan)",
+        query: "q (minimal 2 huruf), page, limit",
+        examples: [`${baseUrl}/books/bukhari/search?q=wudhu`, `${baseUrl}/books/muslim/search?q=niat&limit=5`],
+      },
+      {
+        method: "GET",
+        path: "/search",
+        description: "Cari hadis di semua kitab",
+        examples: [`${baseUrl}/search?q=puasa&limit=10`, `${baseUrl}/search?q=shalat`],
+      },
+      {
+        method: "GET",
+        path: "/books/{id}/random",
+        description: "Hadis acak dari kitab tertentu",
+        examples: [`${baseUrl}/books/bukhari/random`, `${baseUrl}/books/muslim/random`],
+      },
+      {
+        method: "GET",
+        path: "/random",
+        description: "Hadis acak dari 9 kitab (atau filter ?book=)",
+        examples: [`${baseUrl}/random`, `${baseUrl}/random?book=tirmidzi`],
+      },
+    ],
+    usage_notes: [
+      "Full kitab dikembalikan dengan pagination (default 20) untuk menghindari limit 5MB Vercel. Gunakan ?page & ?limit atau ?range untuk ambil semua (loop page 1..N).",
+      "Semua response JSON dengan format { data, pagination, ... }.",
+      "CORS enabled - bisa dipanggil dari frontend mana saja.",
+      "Data Arab & Indonesia tersedia di field 'arab' dan 'id'.",
+    ],
+    credits: {
+      author: "Hanif Abdurrohim",
+      github: "https://github.com/hanifabdurrohim",
+      data_source: "9 file JSON lokal (Kutubut Tis'ah)",
+    },
+    deployed_on: "Vercel - https://vercel.com",
+  };
+
+  if (wantsHtml) {
+    const booksHtml = Object.values(BOOKS)
+      .map(
+        (b) => `
+        <tr>
+          <td><code>${b.id}</code></td>
+          <td>${b.name}<br><small>${b.arabicName}</small></td>
+          <td>${b.available}</td>
+          <td><a href="${baseUrl}/books/${b.id}" target="_blank">${baseUrl}/books/${b.id}</a></td>
+        </tr>`
+      )
+      .join("");
+
+    const endpointsHtml = (payload.endpoints as any[])
+      .map(
+        (e) => `
+        <div class="endpoint">
+          <span class="method">${e.method}</span> <code>${e.path}</code>
+          <p>${e.description}</p>
+          ${e.params ? `<small>Params: ${e.params}</small><br>` : ""}
+          ${e.query ? `<small>Query: ${e.query}</small><br>` : ""}
+          ${e.examples ? `<small>Contoh: ${e.examples.map((ex: string) => `<a href="${ex}" target="_blank">${ex}</a>`).join(", ")}</small>` : ""}
+          ${e.example ? `<small>Contoh: <a href="${e.example}" target="_blank">${e.example}</a></small>` : ""}
+        </div>`
+      )
+      .join("");
+
+    const html = `<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>API Hadis - By Hanif Abdurrohim</title>
+<style>
+  *{box-sizing:border-box} body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,sans-serif; max-width:900px; margin:0 auto; padding:24px; line-height:1.6; color:#1a1a1a; background:#fafaf9}
+  header{border-bottom:3px solid #0f766e; padding-bottom:16px; margin-bottom:24px}
+  h1{margin:0; color:#0f766e} h2{color:#0f766e; margin-top:32px; border-left:4px solid #0f766e; padding-left:12px}
+  .by{color:#57534e; margin:4px 0 0} .badge{display:inline-block; background:#0f766e; color:white; padding:2px 10px; border-radius:999px; font-size:12px; margin-right:6px}
+  table{width:100%; border-collapse:collapse; margin:12px 0} th,td{border:1px solid #e7e5e4; padding:8px 10px; text-align:left} th{background:#f0fdfa}
+  .endpoint{background:white; border:1px solid #e7e5e4; border-left:4px solid #0f766e; padding:12px 16px; margin:12px 0; border-radius:8px}
+  .method{background:#0f766e; color:white; padding:2px 8px; border-radius:4px; font-size:12px; font-weight:bold}
+  code{background:#f0fdfa; padding:2px 6px; border-radius:4px; font-size:13px} a{color:#0f766e} a:hover{opacity:0.8}
+  pre code{background:transparent !important; color:#e7fffe !important; padding:0; border:none; font-size:13px; line-height:1.7}
+  pre{color:#e7fffe; border:1px solid #1e293b}
+  footer{margin-top:40px; padding-top:16px; border-top:1px solid #e7e5e4; text-align:center; color:#57534e; font-size:14px}
+  .notes li{margin:6px 0}
+</style>
+</head>
+<body>
+<header>
+  <h1>📚 API Hadis - 9 Kitab Utama</h1>
+  <p class="by">By - <strong>Hanif Abdurrohim</strong> • v1.0.0 • ${payload.total_hadith.toLocaleString("id-ID")} hadis</p>
+  <p>${payload.description}</p>
+  <div><span class="badge">REST</span><span class="badge">JSON</span><span class="badge">CORS</span><span class="badge">Vercel Ready</span></div>
+</header>
+
+<h2>📖 Daftar Kitab</h2>
+<table>
+  <tr><th>ID</th><th>Nama</th><th>Jumlah</th><th>Endpoint</th></tr>
+  ${booksHtml}
+  <tr style="font-weight:bold; background:#f0fdfa"><td colspan="2">Total</td><td>${payload.total_hadith}</td><td></td></tr>
+</table>
+
+<h2>🔗 Endpoints</h2>
+${endpointsHtml}
+
+<h2>📝 Catatan Penggunaan</h2>
+<ul class="notes">
+  ${payload.usage_notes.map((n) => `<li>${n}</li>`).join("")}
+</ul>
+
+<h2>💡 Contoh Cepat</h2>
+<pre style="background:#1c1917; color:#fafaf9; padding:16px; border-radius:8px; overflow:auto"><code>curl ${baseUrl}/books/bukhari/1
+curl ${baseUrl}/books/muslim?page=1&limit=5
+curl ${baseUrl}/books/bukhari?range=1-10
+curl ${baseUrl}/search?q=niat
+fetch('${baseUrl}/random').then(r=>r.json()).then(console.log)</code></pre>
+
+<footer>
+  <p>© ${new Date().getFullYear()} By - <strong>Hanif Abdurrohim</strong> • Built with Hono + TypeScript • Deployed on Vercel</p>
+  <p><small>Data: 9 JSON Kutubut Tis'ah | Field: <code>arab</code> & <code>id</code></small></p>
+  <p><a href="${baseUrl}/books" target="_blank">Lihat /books (JSON)</a> • <a href="https://github.com/hanifabdurrohim" target="_blank">GitHub</a></p>
+</footer>
+</body>
+</html>`;
+    return c.html(html);
+  }
+
+  return c.json(payload);
 });
 
 // List all books
