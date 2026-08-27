@@ -11,7 +11,7 @@ app.use("*", logger());
 
 // Root info - lengkap + By Hanif (HTML untuk browser, JSON untuk API)
 app.get("/", (c) => {
-  const baseUrl = new URL(c.req.url).origin;
+  const baseUrl = "https://api-hadith.vercel.app";
   const accept = c.req.header("accept") || "";
   const wantsHtml = accept.includes("text/html");
 
@@ -96,7 +96,7 @@ app.get("/", (c) => {
     ],
     credits: {
       author: "Hanif Abdurrohim",
-      github: "https://github.com/hanifabdurrohim",
+      github: "https://github.com/dextryayers",
       data_source: "9 file JSON lokal (Kutubut Tis'ah)",
     },
     deployed_on: "Vercel - https://vercel.com",
@@ -183,7 +183,7 @@ fetch('${baseUrl}/random').then(r=>r.json()).then(console.log)</code></pre>
 <footer>
   <p>© ${new Date().getFullYear()} By - <strong>Hanif Abdurrohim</strong> • Built with Hono + TypeScript • Deployed on Vercel</p>
   <p><small>Data: 9 JSON Kutubut Tis'ah | Field: <code>arab</code> & <code>id</code></small></p>
-  <p><a href="${baseUrl}/books" target="_blank">Lihat /books (JSON)</a> • <a href="https://github.com/hanifabdurrohim" target="_blank">GitHub</a></p>
+  <p><a href="${baseUrl}/books" target="_blank">Lihat /books (JSON)</a> • <a href="https://github.com/dextryayers" target="_blank">GitHub @dextryayers</a></p>
 </footer>
 </body>
 </html>`;
