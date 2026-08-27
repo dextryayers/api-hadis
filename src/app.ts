@@ -16,9 +16,9 @@ app.get("/", (c) => {
   const wantsHtml = accept.includes("text/html");
 
   const payload = {
-    message: "API Hadis Indonesia & Arab - 10 Kitab Utama",
+    message: "API Hadis Indonesia dan Arab 11 Kitab Utama",
     description:
-      "API REST gratis, tanpa API key, untuk mengakses 38.474 hadis & bab dari 10 kitab utama (9 Kutubut Tis'ah + Riyadhus Shalihin) lengkap dengan teks Arab dan terjemahan Indonesia. Cocok untuk aplikasi mobile, web, bot Telegram/WhatsApp, atau pembelajaran.",
+      "API REST gratis tanpa API key untuk 40.274 hadis dan bab dari 11 kitab. Sembilan Kutubut Tisah ditambah Riyadhus Shalihin dan Musnad Syafii. Tiap data punya teks Arab dan terjemah Indonesia. Cocok untuk web, mobile, dan bot.",
     by: "Hanif Abdurrohim",
     version: "1.0.0",
     base_url: baseUrl,
@@ -50,7 +50,7 @@ app.get("/", (c) => {
       {
         method: "GET",
         path: "/books",
-        description: "Daftar 10 kitab + jumlah hadis & bab",
+        description: "Daftar 11 kitab plus jumlah hadis dan bab",
         example: `${baseUrl}/books`,
       },
       {
@@ -94,8 +94,8 @@ app.get("/", (c) => {
       {
         method: "GET",
         path: "/random",
-        description: "Hadis acak dari 10 kitab (atau filter ?book=)",
-        examples: [`${baseUrl}/random`, `${baseUrl}/random?book=riyadush-shalihin`],
+        description: "Hadis acak dari 11 kitab atau filter book",
+        examples: [`${baseUrl}/random`, `${baseUrl}/random?book=musnad-syafii`],
       },
     ],
     pagination_guide: {
@@ -152,7 +152,7 @@ app.get("/", (c) => {
         <tr>
           <td><code>${b.id}</code></td>
           <td>${b.name}<br><small>${b.arabicName}</small></td>
-          <td>${b.available}</td>
+          <td>${b.available.toLocaleString("id-ID")}</td>
           <td><a href="${baseUrl}/books/${b.id}" target="_blank">${baseUrl}/books/${b.id}</a></td>
         </tr>`
       )
@@ -177,240 +177,300 @@ app.get("/", (c) => {
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>API Hadis - By Hanif Abdurrohim</title>
+<title>API Hadis 11 Kitab - By Hanif Abdurrohim</title>
+<meta name="description" content="API Hadis 11 kitab gratis tanpa API key. 40 ribu hadis Arab dan Indonesia.">
 <style>
-  *{box-sizing:border-box} body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,sans-serif; max-width:960px; margin:0 auto; padding:24px; line-height:1.7; color:#1c1917; background:#fafaf9}
-  header{border-bottom:3px solid #0f766e; padding-bottom:16px; margin-bottom:24px}
-  h1{margin:0; color:#0f766e; font-size:28px} h2{color:#0f766e; margin-top:36px; border-left:4px solid #0f766e; padding-left:12px; font-size:20px} h3{margin:18px 0 8px; color:#134e4a}
-  .by{color:#57534e; margin:6px 0 0} .badge{display:inline-block; background:#0f766e; color:white; padding:3px 10px; border-radius:999px; font-size:12px; margin-right:6px}
-  table{width:100%; border-collapse:collapse; margin:12px 0; font-size:14px} th,td{border:1px solid #e7e5e4; padding:8px 10px; text-align:left} th{background:#f0fdfa}
-  .endpoint{background:white; border:1px solid #e7e5e4; border-left:4px solid #0f766e; padding:14px 16px; margin:14px 0; border-radius:10px}
-  .method{background:#0f766e; color:white; padding:2px 8px; border-radius:4px; font-size:12px; font-weight:bold}
-  code{background:#f0fdfa; padding:2px 6px; border-radius:4px; font-size:13px} a{color:#0f766e} a:hover{opacity:0.8}
-  pre code{background:transparent !important; color:#e7fffe !important; padding:0; border:none; font-size:13px; line-height:1.7}
-  pre{color:#e7fffe; border:1px solid #1e293b; background:#1c1917; padding:16px; border-radius:10px; overflow:auto; margin:10px 0}
-  footer{margin-top:48px; padding-top:16px; border-top:1px solid #e7e5e4; text-align:center; color:#57534e; font-size:14px}
-  .notes li{margin:6px 0} .callout{background:#ecfdf5; border:1px solid #a7f3d0; padding:12px 16px; border-radius:8px; margin:12px 0}
-  .warn{background:#fef3c7; border:1px solid #fcd34d; padding:12px 16px; border-radius:8px; margin:12px 0}
-  .grid{display:grid; grid-template-columns:1fr 1fr; gap:12px} @media(max-width:640px){.grid{grid-template-columns:1fr}}
+  :root{--teal:#0f766e;--teal-dark:#115e59;--slate:#1e293b;--muted:#64748b;--bg:#f8fafc;--card:#ffffff;--border:#e2e8f0;--code:#f1f5f9;--radius:14px}
+  *{box-sizing:border-box} html{scroll-behavior:smooth}
+  body{font-family:Inter, system-ui, -apple-system, Segoe UI, Roboto, sans-serif; margin:0; color:var(--slate); background:var(--bg); line-height:1.65; -webkit-font-smoothing:antialiased}
+  a{color:var(--teal); text-decoration:none} a:hover{text-decoration:underline}
+  header{position:sticky; top:0; z-index:30; background:rgba(255,255,255,0.92); backdrop-filter:blur(8px); border-bottom:1px solid var(--border)}
+  .wrap{max-width:1120px; margin:0 auto; padding:0 20px}
+  .header-inner{display:flex; align-items:center; gap:16px; padding:14px 0; flex-wrap:wrap}
+  .brand{font-weight:800; color:var(--teal); font-size:18px; letter-spacing:-0.03em; line-height:1.1}
+  .brand small{display:block; font-weight:500; color:var(--muted); font-size:11px; letter-spacing:0; margin-top:2px}
+  .nav{display:flex; gap:8px; flex-wrap:wrap; margin-left:auto}
+  .nav a{font-size:12px; padding:7px 12px; border:1px solid var(--border); border-radius:999px; background:var(--card); color:var(--slate); font-weight:600}
+  .nav a:hover{border-color:var(--teal); color:var(--teal); text-decoration:none}
+  .hero{padding:28px 0 8px; display:grid; grid-template-columns:1.25fr 0.75fr; gap:20px} @media(max-width:900px){.hero{grid-template-columns:1fr}}
+  .hero h1{margin:0; font-size:32px; letter-spacing:-0.03em; line-height:1.15}
+  .hero p{color:var(--muted); margin:10px 0 0; font-size:14px}
+  .chips{display:flex; gap:8px; flex-wrap:wrap; margin-top:14px}
+  .chip{font-size:11px; padding:6px 10px; border-radius:999px; border:1px solid var(--border); background:var(--card); font-weight:600}
+  .chip.teal{background:var(--teal); color:white; border-color:var(--teal)}
+  .chip.dark{background:var(--slate); color:#f1f5f9; border-color:var(--slate)}
+  .grid2{display:grid; grid-template-columns:1fr 1fr; gap:14px} @media(max-width:860px){.grid2{grid-template-columns:1fr}}
+  .card{background:var(--card); border:1px solid var(--border); border-radius:var(--radius); padding:16px}
+  h2{font-size:17px; margin:32px 0 10px; letter-spacing:-0.02em; color:var(--slate); display:flex; align-items:center; gap:10px}
+  h2 span.num{width:28px; height:28px; display:inline-grid; place-items:center; background:var(--teal); color:white; border-radius:8px; font-size:12px; font-weight:800}
+  h3{font-size:13px; margin:14px 0 8px; color:var(--slate)}
+  table{width:100%; border-collapse:separate; border-spacing:0; overflow:hidden; border:1px solid var(--border); border-radius:12px; background:var(--card); font-size:13px}
+  th,td{padding:10px 12px; text-align:left; border-bottom:1px solid var(--border)} th{background:#f8fafc; font-weight:700; font-size:11px; text-transform:uppercase; letter-spacing:0.06em; color:var(--muted)} tr:last-child td{border-bottom:none}
+  code{background:var(--code); padding:2px 6px; border-radius:6px; font-size:12px; border:1px solid var(--border); font-family:ui-monospace, SFMono-Regular, Menlo, monospace}
+  pre{background:#0f172a; color:#e2e8f0; padding:14px; border-radius:12px; overflow:auto; font-size:12px; line-height:1.6; border:1px solid #1e293b}
+  pre code{background:transparent; border:none; color:inherit; padding:0}
+  .endpoint{background:var(--card); border:1px solid var(--border); border-left:3px solid var(--teal); border-radius:12px; padding:14px 16px; margin:10px 0}
+  .endpoint p{margin:6px 0 0; color:var(--muted); font-size:13px}
+  .method{display:inline-block; background:var(--teal); color:white; padding:2px 8px; border-radius:6px; font-size:11px; font-weight:800; letter-spacing:0.04em}
+  .callout{border-radius:12px; padding:12px 14px; font-size:13px; border:1px solid; line-height:1.6}
+  .callout.info{background:#f0fdfa; border-color:#99f6e4; color:#134e4a}
+  .callout.warn{background:#fffbeb; border-color:#fcd34d; color:#92400e}
+  .tester{background:var(--card); border:1px solid var(--border); border-radius:var(--radius); padding:18px; box-shadow:0 8px 24px rgba(15,118,110,0.07)}
+  .input, select{width:100%; padding:10px 12px; border:1px solid var(--border); border-radius:10px; background:white; font-size:13px}
+  .input:focus, select:focus{outline:none; border-color:var(--teal); box-shadow:0 0 0 3px rgba(15,118,110,0.12)}
+  .btn{appearance:none; border:none; padding:10px 16px; border-radius:10px; font-weight:700; font-size:13px; cursor:pointer}
+  .btn.primary{background:var(--teal); color:white} .btn.primary:hover{background:var(--teal-dark)}
+  .btn.ghost{background:white; border:1px solid var(--border); color:var(--slate)}
+  .badge{font-size:11px; padding:4px 8px; border-radius:999px; border:1px solid var(--border); background:var(--card)}
+  footer{margin-top:36px; padding:20px 0; border-top:1px solid var(--border); color:var(--muted); font-size:12px; text-align:center}
+  .kicker{font-size:11px; letter-spacing:0.08em; text-transform:uppercase; color:var(--teal); font-weight:800}
+  .mono{font-family:ui-monospace, SFMono-Regular, Menlo, monospace}
 </style>
 </head>
 <body>
 <header>
-  <h1>📚 API Hadis - 10 Kitab Utama</h1>
-  <p class="by">By - <strong>Hanif Abdurrohim</strong> • v1.0.0 • ${payload.total_hadith.toLocaleString("id-ID")} hadis & bab • 10 kitab (9 + Riyadhus) • <a href="https://github.com/dextryayers" target="_blank">github.com/dextryayers</a></p>
-  <p>${payload.description}</p>
-  <div><span class="badge">REST</span><span class="badge">JSON</span><span class="badge">CORS</span><span class="badge">No API Key</span><span class="badge">Vercel Ready</span></div>
+  <div class="wrap header-inner">
+    <div class="brand">API Hadis <small>11 kitab • https://api-hadith.vercel.app • By Hanif Abdurrohim</small></div>
+    <nav class="nav">
+      <a href="#quick">Quick start</a>
+      <a href="#kitab">Kitab</a>
+      <a href="#endpoints">Endpoints</a>
+      <a href="#tester">Tester</a>
+      <a href="https://github.com/dextryayers" target="_blank">GitHub</a>
+    </nav>
+  </div>
 </header>
 
-<div class="callout">
-  <strong>🔰 Untuk Pemula - Apa itu API ini?</strong><br>
-  API ini adalah jembatan: kamu kirim request via URL, server balikin data hadis dalam format JSON. Tidak perlu database, tidak perlu login. Cukup <code>fetch()</code> atau <code>curl</code> langsung dapat data. Semua endpoint pakai <code>GET</code> (ambil data), gratis, dan bisa dipakai di website, aplikasi Android/iOS, bot Telegram, dll.
-</div>
+<div class="wrap">
+  <section class="hero">
+    <div>
+      <div class="kicker">Gratis • Tanpa API key • CORS aktif</div>
+      <h1>API Hadis 11 Kitab untuk aplikasi Indonesia</h1>
+      <p>Akses 40.274 hadis dan bab dari 11 kitab. Sembilan Kutubut Tisah ditambah Riyadhus Shalihin dan Musnad Syafii. Tiap data punya teks Arab dan terjemah Indonesia. Siap pakai untuk web, mobile, dan bot.</p>
+      <div class="chips">
+        <span class="chip teal">REST • JSON</span>
+        <span class="chip">40.274 data</span>
+        <span class="chip">Arab dan Indonesia</span>
+        <span class="chip dark">Vercel Ready</span>
+      </div>
+      <div class="card" style="margin-top:16px; display:flex; gap:10px; align-items:center; flex-wrap:wrap">
+        <code style="flex:1" class="mono">GET https://api-hadith.vercel.app/books/bukhari/1</code>
+        <a class="btn primary" href="https://api-hadith.vercel.app/books/bukhari/1" target="_blank">Coba</a>
+        <a class="btn ghost" href="#tester">Buka tester</a>
+      </div>
+    </div>
+    <div class="card">
+      <div class="kicker">Info</div>
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-top:8px">
+        <div><div style="font-size:11px; color:var(--muted)">Total</div><div style="font-weight:800; font-size:22px">${payload.total_hadith.toLocaleString("id-ID")}</div><div style="font-size:11px; color:var(--muted)">hadis dan bab</div></div>
+        <div><div style="font-size:11px; color:var(--muted)">Kitab</div><div style="font-weight:800; font-size:22px">${payload.available_books.length}</div><div style="font-size:11px; color:var(--muted)">11 kitab</div></div>
+      </div>
+      <div style="margin-top:12px; font-size:11px; color:var(--muted)">Base URL produksi</div>
+      <code class="mono">https://api-hadith.vercel.app</code>
+      <div style="margin-top:12px" class="callout info"><b>Untuk pemula:</b> Kirim request GET lewat URL, server balas JSON. Tidak perlu login. Cukup fetch atau curl.</div>
+    </div>
+  </section>
 
-<h2>⚡ Quick Start - 3 Langkah Langsung Jalan</h2>
-<ol>
-  <li><b>Lihat daftar kitab:</b> <a href="${baseUrl}/books" target="_blank">${baseUrl}/books</a> → dapat 10 ID kitab (9 + Riyadhus)</li>
-  <li><b>Ambil 1 hadis:</b> <a href="${baseUrl}/books/bukhari/1" target="_blank">${baseUrl}/books/bukhari/1</a> → hadis Bukhari no 1</li>
-  <li><b>Cari hadis:</b> <a href="${baseUrl}/books/bukhari/search?q=wudhu" target="_blank">${baseUrl}/books/bukhari/search?q=wudhu</a> → cari kata "wudhu"</li>
-</ol>
-<div class="callout" style="background:white">
-  <b>Tidak perlu API key!</b> CORS sudah aktif, jadi bisa langsung <code>fetch</code> dari React, Vue, Next.js, Flutter, dll.<br>
-  <b>Base URL Production:</b> <code>${baseUrl}</code> • <b>Lokal:</b> <code>http://localhost:3000</code>
-</div>
+  <section id="quick">
+    <h2><span class="num">1</span> Quick start tiga langkah</h2>
+    <div class="grid2">
+      <div class="card">
+        <h3>Langkah 1: Lihat daftar kitab</h3>
+        <pre><code>curl https://api-hadith.vercel.app/books</code></pre>
+        <p style="font-size:12px; color:var(--muted)">Dapat 11 ID kitab yang bisa dipakai di endpoint lain.</p>
+      </div>
+      <div class="card">
+        <h3>Langkah 2: Ambil satu hadis</h3>
+        <pre><code>curl https://api-hadith.vercel.app/books/bukhari/1</code></pre>
+        <p style="font-size:12px; color:var(--muted)">Ganti bukhari dengan muslim, musnad-syafii, atau riyadush-shalihin.</p>
+      </div>
+    </div>
+    <div class="card" style="margin-top:12px">
+      <h3>Langkah 3: Cari hadis</h3>
+      <pre><code>curl "https://api-hadith.vercel.app/books/bukhari/search?q=wudhu&limit=5"</code></pre>
+      <p style="font-size:12px; color:var(--muted)">Cari di semua kitab pakai <code>/search?q=puasa</code>. Tidak perlu API key, CORS sudah aktif.</p>
+    </div>
+  </section>
 
-<h2>📖 Daftar Kitab (10 Kitab: 9 Kutubut Tis'ah + Riyadhus Shalihin)</h2>
-<table>
-  <tr><th>ID (pakai ini)</th><th>Nama Kitab</th><th>Jumlah</th><th>Coba Klik</th></tr>
-  ${booksHtml}
-  <tr style="font-weight:bold; background:#f0fdfa"><td colspan="2">Total</td><td>${payload.total_hadith}</td><td>38.102 hadis</td></tr>
-</table>
-<p><small>Gunakan <code>id</code> persis seperti di tabel (huruf kecil, pakai strip: <code>abu-daud</code>, <code>ibnu-majah</code>).</small></p>
+  <section id="kitab">
+    <h2><span class="num">2</span> Daftar kitab</h2>
+    <p style="font-size:13px; color:var(--muted)">Gunakan ID persis seperti di tabel. Contoh: <code>abu-daud</code> pakai strip, bukan spasi.</p>
+    <div style="overflow:auto; border-radius:12px; border:1px solid var(--border)">
+      <table>
+        <tr><th>ID</th><th>Nama</th><th>Jumlah</th><th>Coba</th></tr>
+        ${booksHtml}
+        <tr style="font-weight:700; background:#f8fafc"><td colspan="2">Total</td><td>${payload.total_hadith.toLocaleString("id-ID")}</td><td>11 kitab</td></tr>
+      </table>
+    </div>
+  </section>
 
-<h2>🔗 Daftar Endpoint Lengkap</h2>
-<p>Semua endpoint pakai method <code>GET</code>. Klik contoh untuk coba langsung.</p>
-${endpointsHtml}
+  <section id="endpoints">
+    <h2><span class="num">3</span> Endpoints</h2>
+    <p style="font-size:13px; color:var(--muted)">Semua endpoint pakai GET. Klik contoh untuk coba langsung.</p>
+    ${endpointsHtml}
+  </section>
 
-<h2>📄 Penjelasan Range & Pagination (PENTING - WAJIB PAHAM)</h2>
-<div class="warn">
-  <b>Kenapa tidak bisa <code>/books/bukhari</code> langsung full 6638?</b><br>
-  Karena Vercel limit response ~5MB. 1 kitab Bukhari full = ~12MB, kalau dipaksa kirim akan error/timeout. Solusi: pakai halaman (pagination).
-</div>
-<h3>Cara 1: Pagination (disarankan)</h3>
-<pre><code>${(payload.pagination_guide as any).contoh.join("\n")}</code></pre>
-<p>Response akan ada:</p>
-<pre><code>{
-  "book": "bukhari",
-  "pagination": { "page": 1, "limit": 20, "total": 6638, "totalPages": 332, "hasNext": true, "hasPrev": false },
-  "data": [ ... 20 hadis ... ]
-}</code></pre>
-<p><b>max limit 100</b> per request. Untuk full, loop <code>page=1..totalPages</code> sampai <code>hasNext=false</code>.</p>
+  <section id="pagination">
+    <h2><span class="num">4</span> Pagination dan range</h2>
+    <div class="callout warn"><b>Kenapa tidak bisa ambil full sekaligus?</b> Vercel batasi response sekitar 5MB. Satu kitab full bisa 12MB, jadi harus pakai halaman.</div>
+    <div class="grid2" style="margin-top:12px">
+      <div class="card">
+        <h3>Cara pagination</h3>
+        <pre><code>GET /books/bukhari?page=1&limit=20
+GET /books/bukhari?page=2&limit=20
+GET /books/musnad-syafii?page=1&limit=50</code></pre>
+        <p style="font-size:12px; color:var(--muted)">Response punya <code>pagination: {page, limit, total, totalPages, hasNext}</code>. Max limit 100.</p>
+      </div>
+      <div class="card">
+        <h3>Cara range</h3>
+        <pre><code>GET /books/bukhari?range=1-10
+GET /books/muslim?range=100-120
+GET /books/riyadush-shalihin?range=7-7</code></pre>
+        <p style="font-size:12px; color:var(--muted)">Range pakai nomor hadis, bukan index halaman. Cocok untuk ambil blok kecil.</p>
+      </div>
+    </div>
+  </section>
 
-<h3>Cara 2: Range (ambil nomor tertentu)</h3>
-<pre><code>${baseUrl}/books/bukhari?range=1-10    → hadis no 1 sampai 10
-${baseUrl}/books/bukhari?range=1,10   → sama (koma atau strip)
-${baseUrl}/books/muslim?range=100-120 → no 100-120</code></pre>
-
-<h2>🧩 Struktur Data Hadis (Field)</h2>
-<p>Setiap hadis object seperti ini:</p>
-<pre><code>{
+  <section id="fields">
+    <h2><span class="num">5</span> Struktur data</h2>
+    <pre><code>{
   "number": 1,
-  "arab": "حَدَّثَنَا الْحُمَيْدِيُّ ... (teks Arab + sanad)",
-  "id": "Telah menceritakan kepada kami [Al Humaidi] ... (terjemahan Indonesia)"
+  "arab": "teks Arab lengkap dengan sanad",
+  "id": "terjemahan Indonesia"
 }</code></pre>
-<table>
-  <tr><th>Field</th><th>Tipe</th><th>Arti</th></tr>
-  ${(payload.fields as any).descriptions.map((f: any) => `<tr><td><code>${f.field}</code></td><td>${f.type}</td><td>${f.desc}</td></tr>`).join("")}
-</table>
-<p><small>Endpoint <code>/search</code> dan <code>/random</code> menambah field <code>book</code> untuk tahu asal kitab.</small></p>
+    <table>
+      <tr><th>Field</th><th>Tipe</th><th>Keterangan</th></tr>
+      ${(payload.fields as any).descriptions.map((f: any) => '<tr><td><code>' + f.field + '</code></td><td>' + f.type + '</td><td>' + f.desc + '</td></tr>').join("")}
+    </table>
+    <p style="font-size:12px; color:var(--muted)">Untuk Riyadhus dan Musnad Syafii, response juga punya <code>html</code> berisi terjemah asli. Search dan random tambah <code>book</code>.</p>
+  </section>
 
-<h2>❗ Error Handling (Biar Tidak Bingung)</h2>
-<table>
-  <tr><th>HTTP</th><th>Contoh Request</th><th>Response</th></tr>
-  ${(payload.errors as any[]).map((e: any) => `<tr><td>${e.code}</td><td><code>${e.contoh}</code></td><td><code>${e.response}</code></td></tr>`).join("")}
-</table>
-<p>Semua error format: <code>{ "error": "pesan..." }</code>. Kalau <code>book</code> salah, cek daftar ID di tabel kitab.</p>
+  <section id="errors">
+    <h2><span class="num">6</span> Error</h2>
+    <table>
+      <tr><th>Status</th><th>Contoh</th><th>Balasan</th></tr>
+      ${(payload.errors as any[]).map((e: any) => '<tr><td>' + e.code + '</td><td><code>' + e.contoh + '</code></td><td><code>' + e.response + '</code></td></tr>').join("")}
+    </table>
+    <p style="font-size:12px; color:var(--muted)">Semua error berbentuk <code>{ "error": "pesan" }</code>.</p>
+  </section>
 
-<h2>💻 Contoh Kode Lengkap (Copy-Paste Langsung Jalan)</h2>
-<h3>cURL (Terminal)</h3>
-<pre><code>${(payload.code_examples as any).curl}</code></pre>
-
-<h3>JavaScript / React / Next.js</h3>
-<pre><code>${(payload.code_examples as any).javascript.replace(/</g, "&lt;")}</code></pre>
-
-<h3>Python</h3>
-<pre><code>${(payload.code_examples as any).python}</code></pre>
-
-<div class="grid">
-  <div class="callout">
-    <b>⚡ Tips Frontend</b><br>
-    • Pakai <code>?limit=20</code> untuk list awal, lalu infinite scroll pakai <code>page++</code><br>
-    • Cari pakai debounce 300ms ke <code>/search?q=...</code><br>
-    • Cache hasil di localStorage 1 jam untuk hemat request
-  </div>
-  <div class="warn">
-    <b>🚀 Deploy</b><br>
-    Sudah siap Vercel: <code>vercel --prod</code> → nama project <code>api-hadith</code><br>
-    File data <code>data/*.json</code> otomatis include via <code>vercel.json</code>
-  </div>
-</div>
-
-<h2>📝 Catatan Penggunaan</h2>
-<ul class="notes">
-  ${(payload.usage_notes as any[]).map((n: string) => `<li>${n}</li>`).join("")}
-</ul>
-
-<h2>💡 Contoh Cepat (Lengkap)</h2>
-<pre><code>curl ${baseUrl}/books/bukhari/1
-curl ${baseUrl}/books/muslim?page=1&limit=5
-curl "${baseUrl}/books/bukhari/search?q=wudhu&limit=2"
-curl ${baseUrl}/search?q=niat
-curl ${baseUrl}/random?book=tirmidzi
-fetch('${baseUrl}/books/bukhari?range=1-10').then(r=>r.json()).then(console.log)</code></pre>
-
-<div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap">
-  <h2 style="margin:0; border:none; padding:0">🧪 Live API Tester</h2>
-  <span style="background:#0f766e; color:white; padding:4px 10px; border-radius:999px; font-size:12px; font-weight:bold">● LIVE</span>
-  <span style="background:#1c1917; color:#a7f3d0; padding:4px 10px; border-radius:999px; font-size:12px; font-family:monospace">https://api-hadith.vercel.app</span>
-  <span style="background:#fef3c7; color:#92400e; padding:4px 10px; border-radius:999px; font-size:12px">1 tester untuk 8 route</span>
-</div>
-<p style="margin:8px 0 0; color:#57534e">Pilih endpoint → isi parameter → klik <b>GET</b>. Hasil <b>real JSON</b> langsung dari server (CORS aktif). Bisa untuk semua route tanpa Postman.</p>
-
-<div class="endpoint" style="margin:16px 0; padding:20px; background:white; border:1px solid #e7e5e4; border-radius:14px; box-shadow:0 4px 16px rgba(15,118,110,0.08)">
-  <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:end">
-    <div style="flex:1; min-width:220px">
-      <label style="font-size:12px; font-weight:bold; color:#0f766e">Pilih Endpoint</label>
-      <select id="u-endpoint" onchange="onEndpointChange()" style="width:100%; padding:10px; border:1px solid #e7e5e4; border-radius:8px; margin-top:4px">
-        <option value="/">GET / → Info & Docs</option>
-        <option value="/books">GET /books → List 9 kitab</option>
-        <option value="/books/{id}" selected>GET /books/{id} → Full kitab + pagination</option>
-        <option value="/books/{id}/{number}">GET /books/{id}/{number} → Detail 1 hadis</option>
-        <option value="/books/{id}/search">GET /books/{id}/search?q= → Search per kitab</option>
-        <option value="/search">GET /search?q= → Search semua kitab</option>
-        <option value="/books/{id}/random">GET /books/{id}/random → Random per kitab</option>
-        <option value="/random">GET /random → Random 9 kitab</option>
-        <option value="custom">✏️ Custom URL (manual)</option>
-      </select>
+  <section id="examples">
+    <h2><span class="num">7</span> Contoh kode</h2>
+    <div class="grid2">
+      <div class="card">
+        <h3>cURL</h3>
+        <pre><code>${(payload.code_examples as any).curl}</code></pre>
+      </div>
+      <div class="card">
+        <h3>Python</h3>
+        <pre><code>${(payload.code_examples as any).python.replace(/</g, "&lt;")}</code></pre>
+      </div>
     </div>
-    <div id="u-book-wrap" style="min-width:160px">
-      <label style="font-size:12px; font-weight:bold; color:#0f766e">Kitab (id)</label>
-      <select id="u-book" style="width:100%; padding:10px; border:1px solid #e7e5e4; border-radius:8px; margin-top:4px">
-        <option value="bukhari">bukhari (6638)</option><option value="muslim">muslim (4930)</option><option value="abu-daud">abu-daud (4419)</option><option value="tirmidzi">tirmidzi (3625)</option><option value="nasai">nasai (5364)</option><option value="ibnu-majah">ibnu-majah (4285)</option><option value="ahmad">ahmad (4305)</option><option value="darimi">darimi (2949)</option><option value="malik">malik (1587)</option><option value="riyadush-shalihin">riyadush-shalihin (372 bab)</option>
-      </select>
+    <div class="card" style="margin-top:12px">
+      <h3>JavaScript</h3>
+      <pre><code>${(payload.code_examples as any).javascript.replace(/</g, "&lt;")}</code></pre>
     </div>
-    <div id="u-num-wrap" style="display:none; min-width:110px">
-      <label style="font-size:12px; font-weight:bold; color:#0f766e">Number</label>
-      <input id="u-num" type="number" value="1" min="1" style="width:100%; padding:10px; border:1px solid #e7e5e4; border-radius:8px; margin-top:4px" placeholder="1">
-    </div>
-    <div id="u-q-wrap" style="display:none; min-width:180px">
-      <label style="font-size:12px; font-weight:bold; color:#0f766e">Query q</label>
-      <input id="u-q" value="wudhu" style="width:100%; padding:10px; border:1px solid #e7e5e4; border-radius:8px; margin-top:4px" placeholder="min 2 huruf">
-    </div>
-  </div>
+  </section>
 
-  <!-- quick chips -->
-  <div style="display:flex; gap:6px; flex-wrap:wrap; margin-top:12px">
-    <small style="color:#57534e; align-self:center; font-weight:bold">⚡ Cepat:</small>
-    <button onclick="quick('b1')" style="background:#f0fdfa; border:1px solid #99f6e4; padding:5px 10px; border-radius:999px; cursor:pointer; font-size:12px">Bukhari #1</button>
-    <button onclick="quick('bPage')" style="background:#f0fdfa; border:1px solid #99f6e4; padding:5px 10px; border-radius:999px; cursor:pointer; font-size:12px">Bukhari p1/limit5</button>
-    <button onclick="quick('m500')" style="background:#f0fdfa; border:1px solid #99f6e4; padding:5px 10px; border-radius:999px; cursor:pointer; font-size:12px">Muslim #500</button>
-    <button onclick="quick('searchWudhu')" style="background:#fef3c7; border:1px solid #fcd34d; padding:5px 10px; border-radius:999px; cursor:pointer; font-size:12px">Search wudhu</button>
-    <button onclick="quick('searchPuasa')" style="background:#fef3c7; border:1px solid #fcd34d; padding:5px 10px; border-radius:999px; cursor:pointer; font-size:12px">Search puasa (all)</button>
-    <button onclick="quick('riyadush1')" style="background:#ede9fe; border:1px solid #c4b5fd; padding:5px 10px; border-radius:999px; cursor:pointer; font-size:12px">Riyadush Bab 1</button>
-    <button onclick="quick('random')" style="background:#ecfdf5; border:1px solid #a7f3d0; padding:5px 10px; border-radius:999px; cursor:pointer; font-size:12px">🎲 Random</button>
-  </div>
+  <section id="tester">
+    <h2><span class="num">8</span> Live tester</h2>
+    <p style="font-size:13px; color:var(--muted)">Satu tester untuk semua route. Pilih endpoint, isi parameter, klik GET. Hasil real dari <code>https://api-hadith.vercel.app</code>.</p>
+    <div class="tester">
+      <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:end">
+        <div style="flex:1; min-width:220px">
+          <label style="font-size:11px; font-weight:700; color:var(--teal)">Pilih Endpoint</label>
+          <select id="u-endpoint" onchange="onEndpointChange()" style="width:100%; padding:10px 12px; border:1px solid var(--border); border-radius:10px; margin-top:4px">
+            <option value="/">GET / Info</option>
+            <option value="/books">GET /books List 11 kitab</option>
+            <option value="/books/{id}" selected>GET /books/{id} Full kitab dan pagination</option>
+            <option value="/books/{id}/{number}">GET /books/{id}/{number} Detail satu hadis</option>
+            <option value="/books/{id}/search">GET /books/{id}/search?q= Cari per kitab</option>
+            <option value="/search">GET /search?q= Cari semua kitab</option>
+            <option value="/books/{id}/random">GET /books/{id}/random Acak per kitab</option>
+            <option value="/random">GET /random Acak 11 kitab</option>
+            <option value="custom">Custom URL manual</option>
+          </select>
+        </div>
+        <div id="u-book-wrap" style="min-width:160px">
+          <label style="font-size:11px; font-weight:700; color:var(--teal)">Kitab ID</label>
+          <select id="u-book" style="width:100%; padding:10px 12px; border:1px solid var(--border); border-radius:10px; margin-top:4px">
+            <option value="bukhari">bukhari (6638)</option><option value="muslim">muslim (4930)</option><option value="abu-daud">abu-daud (4419)</option><option value="tirmidzi">tirmidzi (3625)</option><option value="nasai">nasai (5364)</option><option value="ibnu-majah">ibnu-majah (4285)</option><option value="ahmad">ahmad (4305)</option><option value="darimi">darimi (2949)</option><option value="malik">malik (1587)</option><option value="riyadush-shalihin">riyadush-shalihin (372 bab)</option><option value="musnad-syafii">musnad-syafii (1800)</option>
+          </select>
+        </div>
+        <div id="u-num-wrap" style="display:none; min-width:110px">
+          <label style="font-size:11px; font-weight:700; color:var(--teal)">Number</label>
+          <input id="u-num" type="number" value="1" min="1" style="width:100%; padding:10px 12px; border:1px solid var(--border); border-radius:10px; margin-top:4px" placeholder="1">
+        </div>
+        <div id="u-q-wrap" style="display:none; min-width:180px">
+          <label style="font-size:11px; font-weight:700; color:var(--teal)">Query q</label>
+          <input id="u-q" value="wudhu" style="width:100%; padding:10px 12px; border:1px solid var(--border); border-radius:10px; margin-top:4px" placeholder="min 2 huruf">
+        </div>
+      </div>
 
-  <!-- baris 2: pagination / custom -->
-  <div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:10px; align-items:end">
-    <div id="u-page-wrap" style="flex:1; min-width:120px">
-      <label style="font-size:12px; font-weight:bold; color:#57534e">page</label>
-      <input id="u-page" type="number" value="1" min="1" style="width:100%; padding:8px; border:1px solid #e7e5e4; border-radius:6px; margin-top:4px" placeholder="1">
-    </div>
-    <div id="u-limit-wrap" style="flex:1; min-width:120px">
-      <label style="font-size:12px; font-weight:bold; color:#57534e">limit (max 100)</label>
-      <input id="u-limit" type="number" value="5" min="1" max="100" style="width:100%; padding:8px; border:1px solid #e7e5e4; border-radius:6px; margin-top:4px" placeholder="20">
-    </div>
-    <div id="u-range-wrap" style="flex:1; min-width:160px">
-      <label style="font-size:12px; font-weight:bold; color:#57534e">range (opsional)</label>
-      <input id="u-range" placeholder="contoh: 1-10" style="width:100%; padding:8px; border:1px solid #e7e5e4; border-radius:6px; margin-top:4px">
-    </div>
-    <div id="u-custom-wrap" style="display:none; flex:2; min-width:240px">
-      <label style="font-size:12px; font-weight:bold; color:#0f766e">Custom Path</label>
-      <input id="u-custom" value="/books/bukhari/1" style="width:100%; padding:10px; border:1px solid #e7e5e4; border-radius:8px; margin-top:4px; font-family:monospace" placeholder="/books/bukhari/1">
-    </div>
-    <button onclick="testUniversal()" style="background:#0f766e; color:white; border:none; padding:11px 18px; border-radius:8px; cursor:pointer; font-weight:bold; white-space:nowrap">GET →</button>
-  </div>
+      <div style="display:flex; gap:6px; flex-wrap:wrap; margin-top:12px">
+        <small style="color:var(--muted); align-self:center; font-weight:700">Cepat:</small>
+        <button onclick="quick('b1')" style="background:#f0fdfa; border:1px solid #99f6e4; padding:5px 10px; border-radius:999px; cursor:pointer; font-size:11px">Bukhari 1</button>
+        <button onclick="quick('musnad1')" style="background:#ede9fe; border:1px solid #c4b5fd; padding:5px 10px; border-radius:999px; cursor:pointer; font-size:11px">Musnad 1</button>
+        <button onclick="quick('riyadush1')" style="background:#ede9fe; border:1px solid #c4b5fd; padding:5px 10px; border-radius:999px; cursor:pointer; font-size:11px">Riyadush Bab 7</button>
+        <button onclick="quick('searchWudhu')" style="background:#fffbeb; border:1px solid #fcd34d; padding:5px 10px; border-radius:999px; cursor:pointer; font-size:11px">Search wudhu</button>
+        <button onclick="quick('searchPuasa')" style="background:#fffbeb; border:1px solid #fcd34d; padding:5px 10px; border-radius:999px; cursor:pointer; font-size:11px">Search puasa</button>
+        <button onclick="quick('random')" style="background:#ecfdf5; border:1px solid #a7f3d0; padding:5px 10px; border-radius:999px; cursor:pointer; font-size:11px">Acak</button>
+      </div>
 
-  <div style="margin-top:12px; background:#f8fafc; border:1px solid #e2e8f0; border-radius:10px; padding:10px; display:flex; gap:8px; flex-wrap:wrap; align-items:center">
-    <span style="font-size:11px; font-weight:bold; color:#0f766e; background:white; border:1px solid #99f6e4; padding:3px 8px; border-radius:6px">GET</span>
-    <code id="u-preview" style="flex:1; word-break:break-all; background:transparent; border:none; padding:0; font-size:13px; color:#0f172a">${baseUrl}/books/bukhari?page=1&limit=5</code>
-    <button onclick="copyUrl()" style="background:white; border:1px solid #cbd5e1; padding:6px 12px; border-radius:8px; cursor:pointer; font-size:12px; font-weight:600">📋 Copy</button>
-    <a id="u-open" href="${baseUrl}/books/bukhari?page=1&limit=5" target="_blank" style="font-size:12px; background:#0f766e; color:white; padding:6px 12px; border-radius:8px; text-decoration:none; font-weight:600">↗ Buka</a>
-  </div>
+      <div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:12px; align-items:end">
+        <div id="u-page-wrap" style="flex:1; min-width:110px">
+          <label style="font-size:11px; font-weight:700; color:var(--muted)">page</label>
+          <input id="u-page" type="number" value="1" min="1" style="width:100%; padding:8px 12px; border:1px solid var(--border); border-radius:10px; margin-top:4px" placeholder="1">
+        </div>
+        <div id="u-limit-wrap" style="flex:1; min-width:110px">
+          <label style="font-size:11px; font-weight:700; color:var(--muted)">limit max 100</label>
+          <input id="u-limit" type="number" value="5" min="1" max="100" style="width:100%; padding:8px 12px; border:1px solid var(--border); border-radius:10px; margin-top:4px" placeholder="20">
+        </div>
+        <div id="u-range-wrap" style="flex:1; min-width:140px">
+          <label style="font-size:11px; font-weight:700; color:var(--muted)">range opsional</label>
+          <input id="u-range" placeholder="1-10" style="width:100%; padding:8px 12px; border:1px solid var(--border); border-radius:10px; margin-top:4px">
+        </div>
+        <div id="u-custom-wrap" style="display:none; flex:2; min-width:220px">
+          <label style="font-size:11px; font-weight:700; color:var(--teal)">Custom Path</label>
+          <input id="u-custom" value="/books/bukhari/1" style="width:100%; padding:10px 12px; border:1px solid var(--border); border-radius:10px; margin-top:4px; font-family:ui-monospace, monospace" placeholder="/books/bukhari/1">
+        </div>
+        <button onclick="testUniversal()" style="background:var(--teal); color:white; border:none; padding:11px 18px; border-radius:10px; cursor:pointer; font-weight:800; white-space:nowrap">GET</button>
+      </div>
 
-  <div style="display:flex; gap:8px; margin-top:12px; align-items:center; flex-wrap:wrap">
-    <div id="u-status" style="font-size:12px; color:#57534e; background:#f1f5f9; padding:6px 10px; border-radius:999px; border:1px solid #e2e8f0">● Siap — klik GET</div>
-    <div style="margin-left:auto; display:flex; gap:6px">
-      <button onclick="switchTab('json')" id="tab-json" style="background:#0f766e; color:white; border:none; padding:6px 12px; border-radius:999px; cursor:pointer; font-size:12px; font-weight:bold">Raw JSON</button>
-      <button onclick="switchTab('hadis')" id="tab-hadis" style="background:white; border:1px solid #cbd5e1; padding:6px 12px; border-radius:999px; cursor:pointer; font-size:12px">Hadis View</button>
-      <button onclick="copyJson()" style="background:white; border:1px solid #cbd5e1; padding:6px 12px; border-radius:999px; cursor:pointer; font-size:12px">📋 Copy JSON</button>
+      <div style="margin-top:12px; background:#f8fafc; border:1px solid var(--border); border-radius:10px; padding:10px; display:flex; gap:8px; flex-wrap:wrap; align-items:center">
+        <span style="font-size:11px; font-weight:800; color:var(--teal); background:white; border:1px solid #99f6e4; padding:3px 8px; border-radius:6px">GET</span>
+        <code id="u-preview" style="flex:1; word-break:break-all; background:transparent; border:none; padding:0; font-size:12px; color:var(--slate)" class="mono">https://api-hadith.vercel.app/books/bukhari?page=1&limit=5</code>
+        <button onclick="copyUrl()" style="background:white; border:1px solid var(--border); padding:6px 12px; border-radius:8px; cursor:pointer; font-size:11px; font-weight:700">Copy</button>
+        <a id="u-open" href="https://api-hadith.vercel.app/books/bukhari?page=1&limit=5" target="_blank" style="font-size:11px; background:var(--teal); color:white; padding:6px 12px; border-radius:8px; text-decoration:none; font-weight:700">Buka</a>
+      </div>
+
+      <div style="display:flex; gap:8px; margin-top:12px; align-items:center; flex-wrap:wrap">
+        <div id="u-status" style="font-size:11px; color:var(--muted); background:#f1f5f9; padding:6px 10px; border-radius:999px; border:1px solid var(--border)">Siap, klik GET</div>
+        <div style="margin-left:auto; display:flex; gap:6px">
+          <button onclick="switchTab('json')" id="tab-json" style="background:var(--teal); color:white; border:none; padding:6px 12px; border-radius:999px; cursor:pointer; font-size:11px; font-weight:800">Raw JSON</button>
+          <button onclick="switchTab('hadis')" id="tab-hadis" style="background:white; border:1px solid var(--border); padding:6px 12px; border-radius:999px; cursor:pointer; font-size:11px">Hadis View</button>
+          <button onclick="copyJson()" style="background:white; border:1px solid var(--border); padding:6px 12px; border-radius:999px; cursor:pointer; font-size:11px">Copy JSON</button>
+        </div>
+      </div>
+
+      <div id="u-out-json" style="background:#0f172a; color:#e2e8f0; padding:16px; border-radius:12px; font-size:11px; min-height:160px; overflow:auto; max-height:480px; white-space:pre-wrap; word-break:break-word; margin-top:8px; border:1px solid #1e293b; font-family:ui-monospace, monospace; line-height:1.6">Klik GET untuk coba. Tester support 11 kitab, semua route.</div>
+      <div id="u-out-hadis" style="display:none; background:white; border:1px solid var(--border); border-radius:12px; padding:16px; margin-top:8px; max-height:560px; overflow:auto">
+        <div style="text-align:center; color:var(--muted); padding:20px">Pilih endpoint dan klik GET untuk lihat hadis dalam format rapi, Arab dan Indonesia.</div>
+      </div>
     </div>
-  </div>
 
-  <div id="u-out-json" style="background:#0f172a; color:#e2e8f0; padding:16px; border-radius:10px; font-size:12px; min-height:160px; overflow:auto; max-height:480px; white-space:pre-wrap; word-break:break-word; margin-top:8px; border:1px solid #1e293b; font-family:ui-monospace, SFMono-Regular, Menlo, monospace; line-height:1.6">Klik "GET →" untuk coba. Tester ini support semua 8 endpoint — ganti dropdown di atas.</div>
-  <div id="u-out-hadis" style="display:none; background:white; border:1px solid #e7e5e4; border-radius:10px; padding:16px; margin-top:8px; max-height:520px; overflow:auto">
-    <div style="text-align:center; color:#57534e; padding:20px">Pilih endpoint & klik GET untuk lihat hadis dalam format cantik (Arab + Indonesia)</div>
-  </div>
-</div>
+  </section>
 
-<div class="callout">
-  <b>Cara pakai 1 tester ini:</b> 1) Pilih endpoint di dropdown → 2) Isi <code>kitab / number / q</code> yang muncul → 3) Klik <b>GET →</b>. Untuk bebas, pilih <b>Custom URL</b> lalu ketik path apa saja (misal <code>/books/muslim?range=10-12</code>).
+  <footer>
+    <p>© \${new Date().getFullYear()} By <strong>Hanif Abdurrohim</strong> • Built with Hono dan TypeScript • Deploy di Vercel • <a href="https://github.com/dextryayers" target="_blank">GitHub @dextryayers</a></p>
+    <p style="font-size:11px">Data 11 kitab dari folder assets • Field arab dan id • Gratis, tanpa API key, CORS aktif</p>
+    <p><a href="https://api-hadith.vercel.app/books" target="_blank">Lihat /books JSON</a> • <a href="https://api-hadith.vercel.app/books/bukhari/1" target="_blank">Contoh hadis</a> • <a href="https://github.com/dextryayers" target="_blank">GitHub</a></p>
+  </footer>
 </div>
 
 <script>
 const API = "https://api-hadith.vercel.app";
 let lastJson = null;
-let lastStatus = 0;
 function onEndpointChange(){
   const ep = document.getElementById('u-endpoint').value;
   const show = (id, yes)=> document.getElementById(id).style.display = yes ? '' : 'none';
@@ -482,12 +542,12 @@ function updatePreview(){
 function quick(type){
   const set = (id,v)=>{ const el=document.getElementById(id); if(el) el.value=v; };
   if(type==='b1'){ set('u-endpoint','/books/{id}/{number}'); set('u-book','bukhari'); set('u-num','1'); }
+  if(type==='musnad1'){ set('u-endpoint','/books/{id}/{number}'); set('u-book','musnad-syafii'); set('u-num','1'); }
   if(type==='bPage'){ set('u-endpoint','/books/{id}'); set('u-book','bukhari'); set('u-page','1'); set('u-limit','5'); set('u-range',''); }
-  if(type==='m500'){ set('u-endpoint','/books/{id}/{number}'); set('u-book','muslim'); set('u-num','500'); }
   if(type==='searchWudhu'){ set('u-endpoint','/books/{id}/search'); set('u-book','bukhari'); set('u-q','wudhu'); }
   if(type==='searchPuasa'){ set('u-endpoint','/search'); set('u-q','puasa'); set('u-limit','5'); }
-  if(type==='riyadush1'){ set('u-endpoint','/books/{id}/{number}'); set('u-book','riyadush-shalihin'); set('u-num','1'); }
-  if(type==='random'){ set('u-endpoint','/books/{id}/random'); set('u-book','bukhari'); }
+  if(type==='riyadush1'){ set('u-endpoint','/books/{id}/{number}'); set('u-book','riyadush-shalihin'); set('u-num','7'); }
+  if(type==='random'){ set('u-endpoint','/books/{id}/random'); set('u-book','musnad-syafii'); }
   onEndpointChange(); updatePreview(); testUniversal();
 }
 function switchTab(tab){
@@ -496,25 +556,25 @@ function switchTab(tab){
   const jsonEl=document.getElementById('u-out-json');
   const hadisEl=document.getElementById('u-out-hadis');
   if(tab==='json'){
-    jsonBtn.style.background='#0f766e'; jsonBtn.style.color='white'; jsonBtn.style.border='none';
-    hadisBtn.style.background='white'; hadisBtn.style.color='#1c1917'; hadisBtn.style.border='1px solid #cbd5e1';
+    jsonBtn.style.background='var(--teal)'; jsonBtn.style.color='white'; jsonBtn.style.border='none';
+    hadisBtn.style.background='white'; hadisBtn.style.color='var(--slate)'; hadisBtn.style.border='1px solid var(--border)';
     jsonEl.style.display=''; hadisEl.style.display='none';
   } else {
-    hadisBtn.style.background='#0f766e'; hadisBtn.style.color='white'; hadisBtn.style.border='none';
-    jsonBtn.style.background='white'; jsonBtn.style.color='#1c1917'; jsonBtn.style.border='1px solid #cbd5e1';
+    hadisBtn.style.background='var(--teal)'; hadisBtn.style.color='white'; hadisBtn.style.border='none';
+    jsonBtn.style.background='white'; jsonBtn.style.color='var(--slate)'; jsonBtn.style.border='1px solid var(--border)';
     jsonEl.style.display='none'; hadisEl.style.display='';
   }
 }
 function copyUrl(){
   const url = document.getElementById('u-preview').textContent;
-  navigator.clipboard.writeText(url).then(()=>{ const b=document.getElementById('u-preview'); const t=b.textContent; b.textContent='✅ Copied! ' + t; setTimeout(()=>b.textContent=url,1200); });
+  navigator.clipboard.writeText(url).then(()=>{ const b=document.getElementById('u-preview'); const t=b.textContent; b.textContent='Copied ' + t; setTimeout(()=>b.textContent=url,1200); });
 }
 function copyJson(){
   if(!lastJson) return;
   const pretty = JSON.stringify(lastJson, null, 2);
   navigator.clipboard.writeText(pretty).then(()=>{
-    const btn=document.querySelector('button[onclick=\"copyJson()\"]');
-    const old=btn.textContent; btn.textContent='✅ Copied!'; setTimeout(()=>btn.textContent=old,1200);
+    const btn=document.querySelector('button[onclick="copyJson()"]');
+    const old=btn.textContent; btn.textContent='Copied'; setTimeout(()=>btn.textContent=old,1200);
   });
 }
 function escapeHtml(s){ return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
@@ -522,54 +582,47 @@ function renderHadisView(data){
   const el=document.getElementById('u-out-hadis');
   try{
     if(data.error){
-      el.innerHTML = '<div style=\"color:#dc2626; background:#fef2f2; border:1px solid #fecaca; padding:12px; border-radius:8px\">❌ ' + escapeHtml(data.error) + '</div>';
+      el.innerHTML = '<div style="color:#dc2626; background:#fef2f2; border:1px solid #fecaca; padding:12px; border-radius:8px">Error ' + escapeHtml(data.error) + '</div>';
       return;
     }
-    // single hadis: {book, data:{number,arab,id}} -> TAMPIL FULL TANPA POTONG
     if(data.data && data.data.arab && !Array.isArray(data.data)){
       const h=data.data;
-      const book=data.book?'<span style=\"background:#0f766e;color:white;padding:2px 8px;border-radius:999px;font-size:11px\">'+escapeHtml(data.book)+'</span>':'';
-      el.innerHTML = '<div style=\"border:1px solid #e7e5e4; border-radius:10px; padding:16px; background:white\">' +
-        '<div style=\"display:flex; justify-content:space-between; align-items:center; margin-bottom:10px\"><b>Hadis #' + h.number + '</b> ' + book + ' <small style=\"color:#57534e\">full</small></div>' +
-        '<div style=\"background:#f0fdfa; padding:14px; border-radius:8px; text-align:right; font-family:serif; line-height:2; direction:rtl; font-size:16px; border:1px solid #ccfbf1\">' + escapeHtml(h.arab) + '</div>' +
-        '<div style=\"margin-top:12px; line-height:1.8; background:#fafaf9; padding:14px; border-radius:8px; border-left:4px solid #0f766e; font-size:14px\">' + escapeHtml(h.id) + '</div>' +
+      const book=data.book?'<span style="background:var(--teal);color:white;padding:2px 8px;border-radius:999px;font-size:11px">'+escapeHtml(data.book)+'</span>':'';
+      el.innerHTML = '<div style="border:1px solid var(--border); border-radius:12px; padding:16px; background:white">' +
+        '<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px"><b>Hadis #' + h.number + '</b> ' + book + '</div>' +
+        '<div style="background:#f0fdfa; padding:14px; border-radius:10px; text-align:right; font-family:serif; line-height:2; direction:rtl; font-size:16px; border:1px solid #ccfbf1">' + escapeHtml(h.arab) + '</div>' +
+        '<div style="margin-top:12px; line-height:1.8; background:#fafaf9; padding:14px; border-radius:10px; border-left:4px solid var(--teal); font-size:14px">' + escapeHtml(h.id) + '</div>' +
         '</div>';
       return;
     }
-    // list: {data:[...]} -> tampil full per item (tidak dipotong 400), tapi tetap batasi 5 preview agar tidak lag, klik JSON untuk full
     const list = Array.isArray(data.data) ? data.data : (data.data ? [data.data] : []);
     if(list.length && list[0] && list[0].arab){
-      // jika list pendek (<=5) tampil FULL tanpa potong
       const isShort = list.length <= 5;
       el.innerHTML = list.slice(0, isShort ? list.length : 5).map(h=> 
-        '<div style=\"border:1px solid #e7e5e4; border-radius:10px; padding:14px; margin-bottom:12px; background:white\">' +
-        '<div style=\"display:flex; justify-content:space-between; margin-bottom:8px\"><b>#' + h.number + '</b><small style=\"color:#57534e\">' + (data.book?escapeHtml(data.book):'') + '</small></div>' +
-        '<div style=\"background:#f0fdfa; padding:12px; border-radius:8px; text-align:right; direction:rtl; font-family:serif; line-height:1.9; font-size:14px; border:1px solid #ccfbf1\">' + escapeHtml(isShort ? h.arab : (h.arab||'').slice(0,600) + (h.arab&&h.arab.length>600?'...':'')) + '</div>' +
-        '<div style=\"margin-top:10px; font-size:13px; line-height:1.7; background:#fafaf9; padding:10px; border-radius:6px\">' + escapeHtml(isShort ? h.id : (h.id||'').slice(0,500) + (h.id&&h.id.length>500?'...':'')) + '</div>' +
+        '<div style="border:1px solid var(--border); border-radius:12px; padding:14px; margin-bottom:12px; background:white">' +
+        '<div style="display:flex; justify-content:space-between; margin-bottom:8px"><b>#' + h.number + '</b><small style="color:var(--muted)">' + (data.book?escapeHtml(data.book):'') + '</small></div>' +
+        '<div style="background:#f0fdfa; padding:12px; border-radius:10px; text-align:right; direction:rtl; font-family:serif; line-height:1.9; font-size:14px; border:1px solid #ccfbf1">' + escapeHtml(isShort ? h.arab : (h.arab||'').slice(0,600)) + '</div>' +
+        '<div style="margin-top:10px; font-size:13px; line-height:1.7; background:#fafaf9; padding:10px; border-radius:8px">' + escapeHtml(isShort ? h.id : (h.id||'').slice(0,500)) + '</div>' +
         '</div>'
-      ).join('') + (list.length>5 ? '<div style=\"text-align:center; color:#57534e; font-size:12px; background:#f8fafc; padding:8px; border-radius:8px; border:1px dashed #cbd5e1\">+' + (list.length-5) + ' lagi — buka tab Raw JSON atau pakai <code>?range=</code> untuk lihat full</div>' : '<div style=\"text-align:center; color:#0f766e; font-size:12px; margin-top:8px\">✅ Full tampil tanpa potong</div>');
+      ).join('') + (list.length>5 ? '<div style="text-align:center; color:var(--muted); font-size:11px; background:#f8fafc; padding:8px; border-radius:8px; border:1px dashed var(--border)">+' + (list.length-5) + ' lagi, buka Raw JSON untuk full</div>' : '<div style="text-align:center; color:var(--teal); font-size:11px; margin-top:8px">Full tampil</div>');
       return;
     }
-    // fallback for /books list etc
-    el.innerHTML = '<div style=\"color:#57534e; padding:12px\">Lihat tab <b>Raw JSON</b> untuk struktur lengkap. Hadis View otomatis aktif untuk response yang berisi field <code>arab</code> & <code>id</code>.</div>';
+    el.innerHTML = '<div style="color:var(--muted); padding:12px">Lihat tab Raw JSON untuk struktur lengkap. Hadis View aktif untuk response dengan field arab dan id.</div>';
   } catch(e){
-    el.innerHTML = '<div style=\"color:#dc2626\">Gagal render: ' + escapeHtml(e.message) + '</div>';
+    el.innerHTML = '<div style="color:#dc2626">Gagal render: ' + escapeHtml(e.message) + '</div>';
   }
 }
 function setOut(data, url, ms, status){
   lastJson = data;
-  lastStatus = status;
   const jsonEl = document.getElementById('u-out-json');
   const pretty = typeof data === 'string' ? data : JSON.stringify(data, null, 2);
-  // untuk single hadis, tampil FULL tanpa potong (biasa 3-8k). Untuk list, tampil full juga sampai 50k biar tidak kepotong
   const isSingle = data && data.data && data.data.arab && !Array.isArray(data.data);
   const limit = isSingle ? 500000 : 50000;
-  const sliced = pretty.length > limit ? pretty.slice(0,limit) + "\\n... (terpotong " + (pretty.length-limit) + " char — buka di tab/browser untuk full: " + url + ")" : pretty;
-  jsonEl.textContent = "➜ " + url + " [" + status + "] (" + ms + "ms, " + new Blob([pretty]).size + " bytes)\\n" + sliced;
-  // status badge
+  const sliced = pretty.length > limit ? pretty.slice(0,limit) + "\\nTerpotong " + (pretty.length-limit) + " char, buka di tab untuk full: " + url : pretty;
+  jsonEl.textContent = "GET " + url + " [" + status + "] (" + ms + "ms, " + new Blob([pretty]).size + " bytes)\\n" + sliced;
   const statusEl=document.getElementById('u-status');
   const ok = status>=200 && status<300;
-  statusEl.textContent = (ok?'● ':'○ ') + status + ' ' + (ok?'OK':'Error') + ' • ' + ms + 'ms • ' + new Blob([pretty]).size + ' bytes' + (isSingle ? ' • full' : '');
+  statusEl.textContent = (ok?'Sukses ':'Gagal ') + status + ' • ' + ms + 'ms • ' + new Blob([pretty]).size + ' bytes' + (isSingle ? ' • full' : '');
   statusEl.style.background = ok ? '#ecfdf5' : '#fef2f2';
   statusEl.style.color = ok ? '#065f46' : '#991b1b';
   statusEl.style.borderColor = ok ? '#a7f3d0' : '#fecaca';
@@ -579,9 +632,9 @@ async function testUniversal(){
   const url = buildUrl();
   const jsonEl = document.getElementById('u-out-json');
   const statusEl=document.getElementById('u-status');
-  jsonEl.textContent = "⏳ Loading " + url + " ...";
-  document.getElementById('u-out-hadis').innerHTML = '<div style=\"text-align:center; color:#57534e; padding:20px\">⏳ Memuat...</div>';
-  statusEl.textContent = '⏳ Loading...';
+  jsonEl.textContent = "Memuat " + url + " ...";
+  document.getElementById('u-out-hadis').innerHTML = '<div style="text-align:center; color:var(--muted); padding:20px">Memuat</div>';
+  statusEl.textContent = 'Memuat';
   statusEl.style.background='#fef3c7'; statusEl.style.color='#92400e'; statusEl.style.borderColor='#fcd34d';
   const t0 = performance.now();
   try{
@@ -590,22 +643,28 @@ async function testUniversal(){
     const j = await r.json();
     setOut(j, url, ms, r.status);
   }catch(e){
-    jsonEl.textContent = "❌ Error: " + e.message + "\\nURL: " + url;
-    document.getElementById('u-out-hadis').innerHTML = '<div style=\"color:#dc2626; background:#fef2f2; padding:12px; border-radius:8px\">❌ ' + escapeHtml(e.message) + '</div>';
-    statusEl.textContent='❌ Error'; statusEl.style.background='#fef2f2'; statusEl.style.color='#991b1b';
+    jsonEl.textContent = "Error " + e.message + "\\nURL " + url;
+    document.getElementById('u-out-hadis').innerHTML = '<div style="color:#dc2626; background:#fef2f2; padding:12px; border-radius:8px">Error ' + escapeHtml(e.message) + '</div>';
+    statusEl.textContent='Error'; statusEl.style.background='#fef2f2'; statusEl.style.color='#991b1b';
   }
 }
-window.addEventListener('load', ()=>{ onEndpointChange(); setTimeout(testUniversal, 700); });
+window.addEventListener('load', ()=>{ onEndpointChange(); setTimeout(testUniversal, 600); });
 </script>
 
 <footer>
-  <p>© ${new Date().getFullYear()} By - <strong>Hanif Abdurrohim</strong> • Built with Hono + TypeScript • Deployed on Vercel • <a href="https://github.com/dextryayers" target="_blank">GitHub @dextryayers</a></p>
-  <p><small>Data: 9 JSON Kutubut Tis'ah (38.102 hadis) | Field: <code>arab</code> & <code>id</code> | Gratis, No API Key, CORS Enabled</small></p>
-  <p><a href="${baseUrl}/books" target="_blank">Lihat /books (JSON)</a> • <a href="${baseUrl}/books/bukhari/1" target="_blank">Contoh Hadis</a> • <a href="https://github.com/dextryayers" target="_blank">GitHub</a></p>
+  <p>© \${new Date().getFullYear()} By <strong>Hanif Abdurrohim</strong> • Dibuat dengan Hono dan TypeScript • Deploy di Vercel • <a href="https://github.com/dextryayers" target="_blank">GitHub @dextryayers</a></p>
+  <p style="font-size:11px">Data 11 kitab dari folder assets • Field arab dan id • Gratis, tanpa API key, CORS aktif</p>
+  <p><a href="https://api-hadith.vercel.app/books" target="_blank">Lihat /books JSON</a> • <a href="https://api-hadith.vercel.app/books/bukhari/1" target="_blank">Contoh hadis</a> • <a href="https://github.com/dextryayers" target="_blank">GitHub</a></p>
 </footer>
+</div>
 </body>
 </html>`;
     return c.html(html);
+  }
+
+  return c.json(payload);
+});
+
   }
 
   return c.json(payload);

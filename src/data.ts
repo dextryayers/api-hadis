@@ -49,6 +49,18 @@ function getRiyadushDir(): string {
   return found || path.join(assets, "riyadush-sholihin");
 }
 
+function getMusnadSyafiiDir(): string {
+  const assets = getAssetsDir();
+  const candidates = [
+    path.join(assets, "musnad-syafii"),
+    path.join(assets, "musnad-syafii"),
+    path.join(process.cwd(), "assets", "musnad-syafii"),
+    path.join(process.cwd(), "assets", "musnad-syafii"),
+  ];
+  const found = findDir(candidates);
+  return found || path.join(assets, "musnad-syafii");
+}
+
 function stripHtml(html: string): string {
   if (!html) return "";
   // decode entities common
@@ -104,6 +116,36 @@ export function getBookData(bookIdRaw: string): Hadith[] {
     all.sort((a, b) => a.number - b.number);
     cache.set(bookId, all);
     // juga cache alias
+    cache.set(bookIdRaw, all);
+    return all;
+  }
+
+  if (book.isMusnadSyafii) {
+    const musnadDir = getMusnadSyafiiDir();
+    if (!fs.existsSync(musnadDir)) {
+      throw new Error(`Musnad Syafii dir not found: ${musnadDir}`);
+    }
+    const files = Array.from({ length: 12 }, (_, i) => `${i + 1}.json`);
+    const all: Hadith[] = [];
+    for (const f of files) {
+      const fp = path.join(musnadDir, f);
+      if (!fs.existsSync(fp)) continue;
+      const raw = fs.readFileSync(fp, "utf-8");
+      const parsed = JSON.parse(raw) as Array<{ id: number; arab: string; terjemah: string }>;
+      for (const item of parsed) {
+        const arab = (item.arab || "").trim();
+        const html = (item.terjemah || "").trim();
+        const plain = stripHtml(html);
+        all.push({
+          number: item.id,
+          arab,
+          id: plain,
+          html,
+        });
+      }
+    }
+    all.sort((a, b) => a.number - b.number);
+    cache.set(bookId, all);
     cache.set(bookIdRaw, all);
     return all;
   }

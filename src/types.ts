@@ -12,8 +12,9 @@ export interface BookInfo {
   arabicName: string;
   available: number;
   file: string;
-  // khusus riyadush: multi-file
+  // multi-file (riyadush 3 file, musnad syafii 12 file)
   isRiyadush?: boolean;
+  isMusnadSyafii?: boolean;
 }
 
 export const BOOKS: Record<string, BookInfo> = {
@@ -34,12 +35,24 @@ export const BOOKS: Record<string, BookInfo> = {
     file: "riyadush-shalihin",
     isRiyadush: true,
   },
+  "musnad-syafii": {
+    id: "musnad-syafii",
+    name: "Musnad Syafii",
+    arabicName: "مسند الشافعي",
+    available: 1800,
+    file: "musnad-syafii",
+    isMusnadSyafii: true,
+  },
 };
 
 export const BOOK_ALIASES: Record<string, string> = {
   "riyadush-sholihin": "riyadush-shalihin",
   "riyadhus-shalihin": "riyadush-shalihin",
   "riyadhus-sholihin": "riyadush-shalihin",
+  "musnad-syafi'i": "musnad-syafii",
+  "musnad-syafii": "musnad-syafii",
+  "musnad-syafie": "musnad-syafii",
+  "syafii": "musnad-syafii",
 };
 
 export function normalizeBookId(id: string): string {
