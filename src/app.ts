@@ -665,11 +665,6 @@ window.addEventListener('load', ()=>{ onEndpointChange(); setTimeout(testUnivers
   return c.json(payload);
 });
 
-  }
-
-  return c.json(payload);
-});
-
 // List all books
 app.get("/books", (c) => {
   const books = Object.values(BOOKS).map((b) => ({
