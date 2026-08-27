@@ -863,25 +863,13 @@ app.get("/books/:book", (c) => {
     }, 200, cacheHeaders(3600, 86400));
   }
 
-  // Default: paginated page 1 limit 20, but provide hint for full
-  // To get full kitab, client can paginate or use ?limit=100 loop
-  // We keep default paginated to avoid 12MB response jebol Vercel limit
-  const defaultLimit = 20;
-  const paginated = data.slice(0, defaultLimit);
+  // Default: full data, no pagination
   return c.json({
     book: bookId,
     name: book.name,
     arabicName: book.arabicName,
     available: data.length,
-    pagination: {
-      page: 1,
-      limit: defaultLimit,
-      total: data.length,
-      totalPages: Math.ceil(data.length / defaultLimit),
-      hasNext: data.length > defaultLimit,
-    },
-    hint: `Gunakan ?page=2&limit=20 untuk halaman selanjutnya, atau ?range=1-100 untuk range, atau ?limit=100&page=1 untuk ambil 100 sekaligus (max 100 per request). Untuk full ${data.length} hadis, loop paginasi.`,
-    data: paginated,
+    data: data,
   }, 200, cacheHeaders(3600, 86400));
 });
 
