@@ -44,58 +44,80 @@ app.get("/", (c) => {
       {
         method: "GET",
         path: "/",
-        description: "Info API & dokumentasi (halaman ini)",
-        example: `${baseUrl}/`,
+        description: "Menampilkan dokumentasi lengkap. Balas JSON jika Accept application/json, HTML jika browser.",
+        params: "-",
+        query: "-",
+        examples: [`${baseUrl}/`],
+        response: `{ message, description, by, version, base_url, total_hadith, available_books, endpoints }`,
       },
       {
         method: "GET",
         path: "/books",
-        description: "Daftar 11 kitab plus jumlah hadis dan bab",
-        example: `${baseUrl}/books`,
+        description: "Daftar semua kitab yang tersedia. Tiap item punya id, nama, nama Arab, jumlah, dan contoh endpoint.",
+        params: "-",
+        query: "-",
+        examples: [`${baseUrl}/books`],
+        response: `{ data: [{id, name, arabicName, available, endpoint}], total: 11 }`,
       },
       {
         method: "GET",
         path: "/books/{id}",
-        description: "Tampilkan hadis per kitab (full kitab dengan pagination)",
-        params: "id: bukhari | muslim | abu-daud | tirmidzi | nasai | ibnu-majah | ahmad | darimi | malik",
-        query: "page (default 1), limit (default 20, max 100), range (contoh 1-50)",
+        description: "Ambil hadis per kitab. Default kirim 20 pertama dengan pagination. Bisa pakai page dan limit atau range untuk ambil blok nomor.",
+        params: "id wajib. Pilihan: bukhari, muslim, abu-daud, tirmidzi, nasai, ibnu-majah, ahmad, darimi, malik, riyadush-shalihin, musnad-syafii. Alias riyadush-sholihin juga bisa.",
+        query: "page angka mulai 1 default 1, limit 1 sampai 100 default 20, range format 1-10 atau 1,10 untuk ambil nomor hadis langsung",
         examples: [
           `${baseUrl}/books/bukhari`,
-          `${baseUrl}/books/muslim?page=2&limit=20`,
+          `${baseUrl}/books/bukhari?page=1&limit=5`,
+          `${baseUrl}/books/musnad-syafii?page=2&limit=10`,
           `${baseUrl}/books/bukhari?range=1-10`,
-          `${baseUrl}/books/nasai?range=100-120`,
+          `${baseUrl}/books/riyadush-shalihin?range=7-7`,
         ],
+        response: `{ book, name, pagination: {page, limit, total, totalPages, hasNext, hasPrev}, data: [{number, arab, id}] }`,
       },
       {
         method: "GET",
         path: "/books/{id}/{number}",
-        description: "Detail 1 hadis berdasarkan nomor",
-        example: `${baseUrl}/books/bukhari/1`,
+        description: "Ambil satu hadis berdasar nomor. Nomor sesuai urutan kitab asli. Jika nomor tidak ada, balas 404.",
+        params: "id wajib seperti di atas, number wajib angka. Contoh bukhari 1 sampai 6638, riyadush 1 sampai 372, musnad 1 sampai 1800",
+        query: "-",
+        examples: [`${baseUrl}/books/bukhari/1`, `${baseUrl}/books/musnad-syafii/1`, `${baseUrl}/books/riyadush-shalihin/7`],
+        response: `{ book, data: {number, arab, id, html?} }`,
       },
       {
         method: "GET",
         path: "/books/{id}/search",
-        description: "Cari hadis di kitab tertentu (search teks terjemahan)",
-        query: "q (minimal 2 huruf), page, limit",
-        examples: [`${baseUrl}/books/bukhari/search?q=wudhu`, `${baseUrl}/books/muslim/search?q=niat&limit=5`],
+        description: "Cari hadis di satu kitab. Pencarian di terjemah Indonesia, tidak case sensitive, minimal 2 huruf.",
+        params: "id wajib",
+        query: "q wajib minimal 2 huruf, page default 1, limit default 20 max 100",
+        examples: [`${baseUrl}/books/bukhari/search?q=wudhu`, `${baseUrl}/books/bukhari/search?q=wudhu&page=2&limit=5`, `${baseUrl}/books/musnad-syafii/search?q=puasa&limit=3`],
+        response: `{ book, query, pagination: {page, limit, total, totalPages}, data: [...] }`,
       },
       {
         method: "GET",
         path: "/search",
-        description: "Cari hadis di semua kitab",
+        description: "Cari di semua 11 kitab sekaligus. Hasil campur dari semua kitab, urut sesuai kitab ditemukan.",
+        params: "-",
+        query: "q wajib minimal 2 huruf, limit default 20 max 50",
         examples: [`${baseUrl}/search?q=puasa&limit=10`, `${baseUrl}/search?q=shalat`],
+        response: `{ query, total, data: [{book, number, arab, id}] }`,
       },
       {
         method: "GET",
         path: "/books/{id}/random",
-        description: "Hadis acak dari kitab tertentu",
-        examples: [`${baseUrl}/books/bukhari/random`, `${baseUrl}/books/muslim/random`],
+        description: "Ambil satu hadis acak dari kitab yang dipilih. Cocok untuk fitur hadis harian per kitab.",
+        params: "id wajib",
+        query: "-",
+        examples: [`${baseUrl}/books/bukhari/random`, `${baseUrl}/books/musnad-syafii/random`, `${baseUrl}/books/riyadush-shalihin/random`],
+        response: `{ book, data: {number, arab, id} }`,
       },
       {
         method: "GET",
         path: "/random",
-        description: "Hadis acak dari 11 kitab atau filter book",
-        examples: [`${baseUrl}/random`, `${baseUrl}/random?book=musnad-syafii`],
+        description: "Ambil satu hadis acak dari 11 kitab. Bisa filter pakai query book untuk acak di kitab tertentu.",
+        params: "-",
+        query: "book opsional. Jika diisi, acak dari kitab itu. Jika kosong, acak dari 11 kitab.",
+        examples: [`${baseUrl}/random`, `${baseUrl}/random?book=musnad-syafii`, `${baseUrl}/random?book=bukhari`],
+        response: `{ book, data: {number, arab, id} }`,
       },
     ],
     pagination_guide: {
@@ -160,15 +182,37 @@ app.get("/", (c) => {
 
     const endpointsHtml = (payload.endpoints as any[])
       .map(
-        (e) => `
-        <div class="endpoint">
-          <span class="method">${e.method}</span> <code>${e.path}</code>
-          <p>${e.description}</p>
-          ${e.params ? `<small><b>Params:</b> ${e.params}</small><br>` : ""}
-          ${e.query ? `<small><b>Query:</b> ${e.query}</small><br>` : ""}
-          ${e.examples ? `<small><b>Contoh:</b> ${e.examples.map((ex: string) => `<a href="${ex}" target="_blank">${ex}</a>`).join(" • ")}</small>` : ""}
-          ${e.example ? `<small><b>Contoh:</b> <a href="${e.example}" target="_blank">${e.example}</a></small>` : ""}
-        </div>`
+        (e, idx) => {
+          const paramsList = e.params && e.params !== "-" ? e.params.split(",").map((s:string)=>s.trim()).filter(Boolean) : [];
+          const queryList = e.query && e.query !== "-" ? e.query.split(",").map((s:string)=>s.trim()).filter(Boolean) : [];
+          return `
+        <div class="endpoint" id="ep-${idx}">
+          <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap">
+            <span class="method">${e.method}</span>
+            <code style="font-weight:700; font-size:13px">${e.path}</code>
+            <span style="margin-left:auto; font-size:11px; color:var(--muted); background:var(--code); padding:4px 10px; border-radius:999px; border:1px solid var(--border)">Endpoint ${idx+1} dari 8</span>
+          </div>
+          <p style="margin:8px 0 12px; font-size:13px">${e.description}</p>
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin:10px 0">
+            <div style="background:#f8fafc; border:1px solid var(--border); border-radius:10px; padding:10px">
+              <div style="font-size:11px; font-weight:800; color:var(--teal); margin-bottom:6px">Path Params</div>
+              ${paramsList.length ? `<ul style="margin:0; padding-left:16px; font-size:12px; line-height:1.6">${paramsList.map((p:string)=>`<li><code>${p.split(" ")[0]}</code> ${p.slice(p.indexOf(" ")+1)}</li>`).join("")}</ul>` : `<div style="font-size:12px; color:var(--muted)">Tidak ada params, akses langsung</div>`}
+            </div>
+            <div style="background:#f8fafc; border:1px solid var(--border); border-radius:10px; padding:10px">
+              <div style="font-size:11px; font-weight:800; color:var(--teal); margin-bottom:6px">Query String</div>
+              ${queryList.length ? `<ul style="margin:0; padding-left:16px; font-size:12px; line-height:1.6">${queryList.map((q:string)=>`<li><code>${q.split(" ")[0]}</code> ${q.slice(q.indexOf(" ")+1)}</li>`).join("")}</ul>` : `<div style="font-size:12px; color:var(--muted)">Tidak ada query</div>`}
+            </div>
+          </div>
+          ${e.response ? `<div style="margin:10px 0"><div style="font-size:11px; font-weight:800; color:var(--teal); margin-bottom:6px">Contoh response</div><pre style="margin:0; font-size:11px"><code>${e.response}</code></pre></div>` : ""}
+          <div style="margin-top:12px">
+            <div style="font-size:11px; font-weight:800; color:var(--slate); margin-bottom:6px">Contoh request per poin</div>
+            <div style="display:flex; gap:6px; flex-wrap:wrap">
+              ${(e.examples || (e.example ? [e.example] : [])).map((ex: string) => `<a href="${ex}" target="_blank" style="font-size:11px; background:white; border:1px solid var(--border); padding:6px 12px; border-radius:999px; text-decoration:none; white-space:nowrap; max-width:100%; overflow:hidden; text-overflow:ellipsis">GET ${ex.replace(baseUrl, "")}</a>`).join("")}
+            </div>
+            <details style="margin-top:8px"><summary style="font-size:11px; color:var(--teal); cursor:pointer; font-weight:700">Salin curl</summary><pre style="margin-top:6px; font-size:11px"><code>curl ${(e.examples || [e.example])[0]}</code></pre></details>
+          </div>
+        </div>`;
+        }
       )
       .join("");
 
@@ -225,6 +269,24 @@ app.get("/", (c) => {
   footer{margin-top:36px; padding:20px 0; border-top:1px solid var(--border); color:var(--muted); font-size:12px; text-align:center}
   .kicker{font-size:11px; letter-spacing:0.08em; text-transform:uppercase; color:var(--teal); font-weight:800}
   .mono{font-family:ui-monospace, SFMono-Regular, Menlo, monospace}
+  /* responsif HP */
+  @media(max-width:640px){
+    .wrap{padding:0 14px}
+    .header-inner{padding:10px 0; gap:10px}
+    .brand{font-size:16px} .brand small{font-size:10px}
+    .hero{padding:16px 0 6px; gap:14px} .hero h1{font-size:24px} .hero p{font-size:13px}
+    .nav{width:100%; overflow:auto; -webkit-overflow-scrolling:touch; padding-bottom:2px; margin-left:0; scrollbar-width:none}
+    .nav::-webkit-scrollbar{display:none} .nav a{white-space:nowrap; flex:0 0 auto; font-size:11px; padding:6px 10px}
+    table{font-size:12px} th,td{padding:8px 10px}
+    pre{font-size:11px; padding:12px}
+    .tester{padding:14px} .tester .btn{width:100%}
+    h2{font-size:16px; margin:24px 0 8px}
+    .endpoint{padding:12px}
+  }
+  @media(max-width:400px){
+    .hero h1{font-size:22px}
+    .grid2{gap:10px}
+  }
 </style>
 </head>
 <body>
@@ -460,12 +522,6 @@ GET /books/riyadush-shalihin?range=7-7</code></pre>
     </div>
 
   </section>
-
-  <footer>
-    <p>© \${new Date().getFullYear()} By <strong>Hanif Abdurrohim</strong> • Built with Hono dan TypeScript • Deploy di Vercel • <a href="https://github.com/dextryayers" target="_blank">GitHub @dextryayers</a></p>
-    <p style="font-size:11px">Data 11 kitab dari folder assets • Field arab dan id • Gratis, tanpa API key, CORS aktif</p>
-    <p><a href="https://api-hadith.vercel.app/books" target="_blank">Lihat /books JSON</a> • <a href="https://api-hadith.vercel.app/books/bukhari/1" target="_blank">Contoh hadis</a> • <a href="https://github.com/dextryayers" target="_blank">GitHub</a></p>
-  </footer>
 </div>
 
 <script>
