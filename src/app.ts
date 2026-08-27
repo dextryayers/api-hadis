@@ -193,7 +193,7 @@ app.get("/", (c) => {
             <span style="margin-left:auto; font-size:11px; color:var(--muted); background:var(--code); padding:4px 10px; border-radius:999px; border:1px solid var(--border)">Endpoint ${idx+1} dari 8</span>
           </div>
           <p style="margin:8px 0 12px; font-size:13px">${e.description}</p>
-          <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin:10px 0">
+          <div class="ep-grid" style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin:10px 0">
             <div style="background:#f8fafc; border:1px solid var(--border); border-radius:10px; padding:10px">
               <div style="font-size:11px; font-weight:800; color:var(--teal); margin-bottom:6px">Path Params</div>
               ${paramsList.length ? `<ul style="margin:0; padding-left:16px; font-size:12px; line-height:1.6">${paramsList.map((p:string)=>`<li><code>${p.split(" ")[0]}</code> ${p.slice(p.indexOf(" ")+1)}</li>`).join("")}</ul>` : `<div style="font-size:12px; color:var(--muted)">Tidak ada params, akses langsung</div>`}
@@ -269,23 +269,41 @@ app.get("/", (c) => {
   footer{margin-top:36px; padding:20px 0; border-top:1px solid var(--border); color:var(--muted); font-size:12px; text-align:center}
   .kicker{font-size:11px; letter-spacing:0.08em; text-transform:uppercase; color:var(--teal); font-weight:800}
   .mono{font-family:ui-monospace, SFMono-Regular, Menlo, monospace}
-  /* responsif HP */
+  /* tablet */
+  @media(max-width:900px){
+    .hero{grid-template-columns:1fr}
+    .grid2{grid-template-columns:1fr}
+    .ep-grid{grid-template-columns:1fr !important}
+  }
+  /* HP */
   @media(max-width:640px){
     .wrap{padding:0 14px}
-    .header-inner{padding:10px 0; gap:10px}
-    .brand{font-size:16px} .brand small{font-size:10px}
-    .hero{padding:16px 0 6px; gap:14px} .hero h1{font-size:24px} .hero p{font-size:13px}
-    .nav{width:100%; overflow:auto; -webkit-overflow-scrolling:touch; padding-bottom:2px; margin-left:0; scrollbar-width:none}
+    .header-inner{padding:10px 0; gap:10px; flex-direction:column; align-items:flex-start}
+    .brand{font-size:16px} .brand small{font-size:10px; display:block}
+    .nav{width:100%; overflow:auto; -webkit-overflow-scrolling:touch; padding-bottom:2px; margin-left:0; scrollbar-width:none; flex-wrap:nowrap}
     .nav::-webkit-scrollbar{display:none} .nav a{white-space:nowrap; flex:0 0 auto; font-size:11px; padding:6px 10px}
-    table{font-size:12px} th,td{padding:8px 10px}
-    pre{font-size:11px; padding:12px}
-    .tester{padding:14px} .tester .btn{width:100%}
-    h2{font-size:16px; margin:24px 0 8px}
+    .hero{padding:16px 0 6px; gap:14px} .hero h1{font-size:24px} .hero p{font-size:13px}
+    .chips{gap:6px} .chip{font-size:10px; padding:5px 8px}
+    .grid2{grid-template-columns:1fr; gap:10px}
+    .card{padding:14px}
+    table{font-size:12px; display:block; overflow-x:auto; -webkit-overflow-scrolling:touch}
+    th,td{padding:8px 10px; white-space:nowrap}
+    pre{font-size:11px; padding:12px; overflow-x:auto; white-space:pre; word-break:normal}
+    code{font-size:11px}
     .endpoint{padding:12px}
+    .ep-grid{grid-template-columns:1fr !important}
+    .tester{padding:14px}
+    .tester .btn{width:100%}
+    h2{font-size:16px; margin:24px 0 8px}
+    h2 .num{width:24px; height:24px; font-size:11px}
+    footer{padding:16px 0} footer p{font-size:11px}
   }
   @media(max-width:400px){
-    .hero h1{font-size:22px}
-    .grid2{gap:10px}
+    .hero h1{font-size:20px}
+    .hero p{font-size:12px}
+    .wrap{padding:0 10px}
+    .card{padding:12px}
+    pre{font-size:10px; padding:10px}
   }
 </style>
 </head>
@@ -357,7 +375,7 @@ app.get("/", (c) => {
   <section id="kitab">
     <h2><span class="num">2</span> Daftar kitab</h2>
     <p style="font-size:13px; color:var(--muted)">Gunakan ID persis seperti di tabel. Contoh: <code>abu-daud</code> pakai strip, bukan spasi.</p>
-    <div style="overflow:auto; border-radius:12px; border:1px solid var(--border)">
+          <div style="overflow:auto; border-radius:12px; border:1px solid var(--border)">
       <table>
         <tr><th>ID</th><th>Nama</th><th>Jumlah</th><th>Coba</th></tr>
         ${booksHtml}
@@ -708,7 +726,7 @@ window.addEventListener('load', ()=>{ onEndpointChange(); setTimeout(testUnivers
 </script>
 
 <footer>
-  <p>© \${new Date().getFullYear()} By <strong>Hanif Abdurrohim</strong> • Dibuat dengan Hono dan TypeScript • Deploy di Vercel • <a href="https://github.com/dextryayers" target="_blank">GitHub @dextryayers</a></p>
+  <p>© ${new Date().getFullYear()} By <strong>Hanif Abdurrohim</strong> • Dibuat dengan Hono dan TypeScript • Deploy di Vercel • <a href="https://github.com/dextryayers" target="_blank">GitHub @dextryayers</a></p>
   <p style="font-size:11px">Data 11 kitab dari folder assets • Field arab dan id • Gratis, tanpa API key, CORS aktif</p>
   <p><a href="https://api-hadith.vercel.app/books" target="_blank">Lihat /books JSON</a> • <a href="https://api-hadith.vercel.app/books/bukhari/1" target="_blank">Contoh hadis</a> • <a href="https://github.com/dextryayers" target="_blank">GitHub</a></p>
 </footer>
