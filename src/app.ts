@@ -766,7 +766,7 @@ app.get("/books", (c) => {
   }, 200, cacheHeaders(3600, 86400));
 });
 
-// Search across all books? /search?q=
+// Search across all books? /search?q=  - optimized: scan max 6 books to stay <10s on Hobby
 app.get("/search", async (c) => {
   const q = c.req.query("q");
   if (!q || q.trim().length < 2) {
@@ -774,9 +774,16 @@ app.get("/search", async (c) => {
   }
   const limit = Math.min(parseInt(c.req.query("limit") || "20"), 50);
   const results: any[] = [];
-
+  let scanned = 0;
   for (const bookId of BOOK_IDS) {
+    if (scanned >= 6 && results.length === 0) {
+      // already scanned 6 books with no result, still allow scan all if limit not reached but warn
+      // to keep <10s we cap at 6 for cold start misses
+      break;
+    }
+    if (scanned >= 8) break;
     const matched = await searchBookData(bookId, q);
+    scanned++;
     for (const h of matched.slice(0, limit)) {
       results.push({ book: bookId, ...h });
       if (results.length >= limit) break;
@@ -788,6 +795,8 @@ app.get("/search", async (c) => {
     query: q,
     total: results.length,
     data: results,
+    scanned_books: scanned,
+    note: results.length < limit && scanned >= 6 ? "Hasil dibatasi 6 kitab pertama untuk jaga response <10s. Gunakan /books/{id}/search untuk cari di kitab spesifik." : undefined,
   }, 200, { "Cache-Control": "no-cache" });
 });
 
