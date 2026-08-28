@@ -1,64 +1,18 @@
 import fs from "node:fs";
 import path from "node:path";
-import { fileURLToPath } from "node:url";
 import type { Hadith } from "./types.js";
 import { BOOKS, normalizeBookId } from "./types.js";
 
-function findDir(candidates: string[]): string | null {
-  for (const c of candidates) {
-    if (fs.existsSync(c)) return c;
-  }
-  return null;
-}
-
-function getAssetsDir(): string {
-  const candidates = [
-    path.join(process.cwd(), "assets"),
-    path.join(path.dirname(fileURLToPath(import.meta.url)), "..", "..", "assets"),
-    path.join(path.dirname(fileURLToPath(import.meta.url)), "..", "assets"),
-    path.join(process.cwd(), "assets"),
-  ];
-  return findDir(candidates) || candidates[0];
-}
-
 function getDataDir(): string {
-  const assets = getAssetsDir();
-  const candidates = [
-    path.join(assets, "data"),
-    path.join(process.cwd(), "assets", "data"),
-    path.join(process.cwd(), "data"),
-    path.join(path.dirname(fileURLToPath(import.meta.url)), "..", "..", "assets", "data"),
-    path.join(path.dirname(fileURLToPath(import.meta.url)), "..", "data"),
-  ];
-  const found = findDir(candidates);
-  if (found) return found;
-  // fallback to assets/data even if not exists yet (for error message)
-  return path.join(assets, "data");
+  return path.join(process.cwd(), "assets", "data");
 }
 
 function getRiyadushDir(): string {
-  const assets = getAssetsDir();
-  const candidates = [
-    path.join(assets, "riyadush-sholihin"),
-    path.join(assets, "riyadush-shalihin"),
-    path.join(assets, "riyadhus-shalihin"),
-    path.join(process.cwd(), "assets", "riyadush-sholihin"),
-    path.join(process.cwd(), "assets", "riyadush-shalihin"),
-  ];
-  const found = findDir(candidates);
-  return found || path.join(assets, "riyadush-sholihin");
+  return path.join(process.cwd(), "assets", "riyadush-sholihin");
 }
 
 function getMusnadSyafiiDir(): string {
-  const assets = getAssetsDir();
-  const candidates = [
-    path.join(assets, "musnad-syafii"),
-    path.join(assets, "musnad-syafii"),
-    path.join(process.cwd(), "assets", "musnad-syafii"),
-    path.join(process.cwd(), "assets", "musnad-syafii"),
-  ];
-  const found = findDir(candidates);
-  return found || path.join(assets, "musnad-syafii");
+  return path.join(process.cwd(), "assets", "musnad-syafii");
 }
 
 function stripHtml(html: string): string {
