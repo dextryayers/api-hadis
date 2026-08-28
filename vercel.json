@@ -1,5 +1,10 @@
 {
-  "rewrites": [{ "source": "/(.*)", "destination": "/api" }],
+  "rewrites": [
+    { "source": "/books/:path*", "destination": "/api" },
+    { "source": "/search", "destination": "/api" },
+    { "source": "/random", "destination": "/api" },
+    { "source": "/", "destination": "/api" }
+  ],
   "functions": {
     "api/index.ts": {
       "maxDuration": 10
