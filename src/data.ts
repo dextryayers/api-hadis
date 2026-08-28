@@ -3,6 +3,8 @@ import path from "node:path";
 import type { Hadith } from "./types.js";
 import { BOOKS, normalizeBookId } from "./types.js";
 
+const CDN_BASE = "https://hadisbooks.vercel.app";
+
 function stripHtml(html: string): string {
   if (!html) return "";
   let text = html
@@ -23,6 +25,18 @@ function resolveFile(...segments: string[]): string {
   const p2 = path.join(process.cwd(), "public", ...segments);
   if (fs.existsSync(p2)) return p2;
   return p1;
+}
+
+async function fetchFallback(urlPath: string): Promise<any> {
+  const controller = new AbortController();
+  const t = setTimeout(() => controller.abort(), 8000);
+  try {
+    const r = await fetch(`${CDN_BASE}${urlPath}`, { signal: controller.signal });
+    if (!r.ok) throw new Error(`CDN ${r.status}`);
+    return await r.json();
+  } finally {
+    clearTimeout(t);
+  }
 }
 
 const cache = new Map<string, Hadith[]>();
@@ -55,6 +69,7 @@ export async function getBookData(bookIdRaw: string): Promise<Hadith[]> {
   if (cache.has(bookId)) return cache.get(bookId)!;
 
   let all: Hadith[] = [];
+  let usedFallback = false;
 
   if (book.isRiyadush) {
     const baseCandidates = [
@@ -64,16 +79,30 @@ export async function getBookData(bookIdRaw: string): Promise<Hadith[]> {
       path.join(process.cwd(), "public", "riyadush-shalihin"),
       path.join(process.cwd(), "assets", "riyadhus-shalihin"),
     ];
-    let dir = baseCandidates.find((d) => fs.existsSync(d)) || baseCandidates[0];
-    for (const f of ["1.json", "2.json", "3.json"]) {
-      const fp = path.join(dir, f);
-      if (!fs.existsSync(fp)) continue;
-      const raw = fs.readFileSync(fp, "utf-8");
-      const parsed = JSON.parse(raw) as Array<{ id: number; arab: string; terjemah: string }>;
-      for (const item of parsed) {
-        const arab = (item.arab || "").trim();
-        const html = (item.terjemah || "").trim();
-        all.push({ number: item.id, arab, id: stripHtml(html), html });
+    let dir = baseCandidates.find((d) => fs.existsSync(d)) || null;
+    if (dir) {
+      for (const f of ["1.json", "2.json", "3.json"]) {
+        const fp = path.join(dir, f);
+        if (!fs.existsSync(fp)) continue;
+        const raw = fs.readFileSync(fp, "utf-8");
+        const parsed = JSON.parse(raw) as Array<{ id: number; arab: string; terjemah: string }>;
+        for (const item of parsed) {
+          const arab = (item.arab || "").trim();
+          const html = (item.terjemah || "").trim();
+          all.push({ number: item.id, arab, id: stripHtml(html), html });
+        }
+      }
+    }
+    if (all.length === 0) {
+      usedFallback = true;
+      const promises = ["1.json", "2.json", "3.json"].map((f) => fetchFallback(`/riyadush-sholihin/${f}`).catch(() => [] as any[]));
+      const results = await Promise.all(promises);
+      for (const parsed of results as Array<Array<{ id: number; arab: string; terjemah: string }>>) {
+        for (const item of parsed) {
+          const arab = (item.arab || "").trim();
+          const html = (item.terjemah || "").trim();
+          all.push({ number: item.id, arab, id: stripHtml(html), html });
+        }
       }
     }
     all.sort((a, b) => a.number - b.number);
@@ -82,28 +111,51 @@ export async function getBookData(bookIdRaw: string): Promise<Hadith[]> {
       path.join(process.cwd(), "assets", "musnad-syafii"),
       path.join(process.cwd(), "public", "musnad-syafii"),
     ];
-    let dir = baseCandidates.find((d) => fs.existsSync(d)) || baseCandidates[0];
-    for (let i = 1; i <= 12; i++) {
-      const fp = path.join(dir, `${i}.json`);
-      if (!fs.existsSync(fp)) continue;
-      const raw = fs.readFileSync(fp, "utf-8");
-      const parsed = JSON.parse(raw) as Array<{ id: number; arab: string; terjemah: string }>;
-      for (const item of parsed) {
-        const arab = (item.arab || "").trim();
-        const html = (item.terjemah || "").trim();
-        all.push({ number: item.id, arab, id: stripHtml(html), html });
+    let dir = baseCandidates.find((d) => fs.existsSync(d)) || null;
+    if (dir) {
+      for (let i = 1; i <= 12; i++) {
+        const fp = path.join(dir, `${i}.json`);
+        if (!fs.existsSync(fp)) continue;
+        const raw = fs.readFileSync(fp, "utf-8");
+        const parsed = JSON.parse(raw) as Array<{ id: number; arab: string; terjemah: string }>;
+        for (const item of parsed) {
+          const arab = (item.arab || "").trim();
+          const html = (item.terjemah || "").trim();
+          all.push({ number: item.id, arab, id: stripHtml(html), html });
+        }
+      }
+    }
+    if (all.length === 0) {
+      usedFallback = true;
+      const promises = Array.from({ length: 12 }, (_, k) => fetchFallback(`/musnad-syafii/${k + 1}.json`).catch(() => [] as any[]));
+      const results = await Promise.all(promises);
+      for (const parsed of results as Array<Array<{ id: number; arab: string; terjemah: string }>>) {
+        for (const item of parsed) {
+          const arab = (item.arab || "").trim();
+          const html = (item.terjemah || "").trim();
+          all.push({ number: item.id, arab, id: stripHtml(html), html });
+        }
       }
     }
     all.sort((a, b) => a.number - b.number);
   } else {
     const fp = resolveFile("assets", "data", book.file);
     const alt = resolveFile("public", "data", book.file);
-    const finalPath = fs.existsSync(fp) ? fp : alt;
-    if (!fs.existsSync(finalPath)) throw new Error(`Data file not found: ${finalPath}`);
-    const raw = fs.readFileSync(finalPath, "utf-8");
-    all = JSON.parse(raw) as Hadith[];
+    const finalPath = fs.existsSync(fp) ? fp : fs.existsSync(alt) ? alt : "";
+    if (finalPath && fs.existsSync(finalPath)) {
+      const raw = fs.readFileSync(finalPath, "utf-8");
+      all = JSON.parse(raw) as Hadith[];
+    } else {
+      usedFallback = true;
+      try {
+        all = await fetchFallback(`/data/${book.file}`) as Hadith[];
+      } catch (e: any) {
+        throw new Error(`Data file not found local nor CDN: ${book.file} - ${e.message}`);
+      }
+    }
   }
 
+  if (all.length === 0 && !usedFallback) throw new Error(`Data empty for ${bookId}`);
   ensureIndex(bookId, bookIdRaw, all);
   return all;
 }
