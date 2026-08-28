@@ -863,13 +863,22 @@ app.get("/books/:book", (c) => {
     }, 200, cacheHeaders(3600, 86400));
   }
 
-  // Default: full data, no pagination
+  // Default: paginated page 1 limit 20
+  const defaultLimit = 20;
+  const paginated = data.slice(0, defaultLimit);
   return c.json({
     book: bookId,
     name: book.name,
     arabicName: book.arabicName,
     available: data.length,
-    data: data,
+    pagination: {
+      page: 1,
+      limit: defaultLimit,
+      total: data.length,
+      totalPages: Math.ceil(data.length / defaultLimit),
+      hasNext: data.length > defaultLimit,
+    },
+    data: paginated,
   }, 200, cacheHeaders(3600, 86400));
 });
 
