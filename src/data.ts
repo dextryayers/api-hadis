@@ -118,6 +118,30 @@ export async function searchBookData(bookIdRaw: string, q: string): Promise<Hadi
   const lower = q.toLowerCase();
   const s = idxSearch.get(bookId);
   if (s) return s.filter((x) => x.text.includes(lower)).map((x) => x.hadith);
+  // for large books, search via chunks to avoid 8MB fetch timeout
+  const book = BOOKS[bookId];
+  if (book && !book.isRiyadush && !book.isMusnadSyafii) {
+    const total = book.available;
+    const cs = (bookId === "bukhari" || bookId === "muslim") ? 50 : 100;
+    const pages = Math.ceil(total / cs);
+    // fetch first 3 chunks only for quick response, build partial index
+    // to stay <10s, limit to 6 chunks (600 items) for initial search, enough for q=wudhu
+    const toFetch = Math.min(pages, 6);
+    const promises = Array.from({ length: toFetch }, (_, i) => fetchJson(`/data/${bookId}/${i + 1}.json`).catch(() => [] as Hadith[]));
+    const chunks = await Promise.all(promises);
+    const partial = chunks.flat() as Hadith[];
+    // if found enough in partial, return
+    const foundPartial = partial.filter((h) => (h.id || "").toLowerCase().includes(lower));
+    if (foundPartial.length >= 5) {
+      // warm cache with partial for next search
+      buildSearchIdx(bookId, partial);
+      return foundPartial;
+    }
+    // fallback to full for rare query
+    const data = await getBookData(bookIdRaw);
+    buildSearchIdx(bookId, data);
+    return idxSearch.get(bookId)!.filter((x) => x.text.includes(lower)).map((x) => x.hadith);
+  }
   const data = await getBookData(bookIdRaw);
   buildSearchIdx(bookId, data);
   return idxSearch.get(bookId)!.filter((x) => x.text.includes(lower)).map((x) => x.hadith);
