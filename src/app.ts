@@ -21,6 +21,9 @@ function cacheHeaders(maxAge: number, stale?: number): Record<string, string> {
   return { "Cache-Control": parts.join(", ") };
 }
 
+app.get("/health", (c) => c.json({ ok: true, time: new Date().toISOString(), region: process.env.VERCEL_REGION || "local" }));
+app.get("/ping", (c) => c.text("pong"));
+
 // Root info - lengkap + By Hanif (HTML untuk browser, JSON untuk API)
 app.get("/", (c) => {
   const baseUrl = "https://hadisbooks.vercel.app";
