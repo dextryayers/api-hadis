@@ -2,7 +2,7 @@ import { Hono } from "hono";
 import { cors } from "hono/cors";
 import { logger } from "hono/logger";
 import { BOOKS, BOOK_IDS, normalizeBookId } from "./types.js";
-import { getBookData, getHadithByNumber, searchBookData } from "./data.js";
+import { getBookData, getBookPage, getHadithByNumber, searchBookData } from "./data.js";
 
 const app = new Hono();
 
@@ -821,14 +821,12 @@ app.get("/books/:book", async (c) => {
     return c.json({ error: `Kitab tidak ditemukan: ${bookIdRaw}`, available: BOOK_IDS }, 404);
   }
 
-  const data = await getBookData(bookId);
-
   // Query handling: range, page/limit, or full
   const range = c.req.query("range"); // e.g. 1-20 or 1,20
   const pageParam = c.req.query("page");
   const limitParam = c.req.query("limit");
 
-  // Range mode: ?range=1-20
+  // Range mode: ?range=1-20 - use chunk if small range
   if (range) {
     const normalized = range.replace(",", "-");
     const [startStr, endStr] = normalized.split("-");
@@ -837,6 +835,8 @@ app.get("/books/:book", async (c) => {
     if (isNaN(start) || isNaN(end) || start < 1 || end < start) {
       return c.json({ error: "format range salah, contoh: ?range=1-20" }, 400);
     }
+    // for riyadush/musnad or large range, fallback to full
+    const data = await getBookData(bookId);
     const sliced = data.filter((h) => h.number >= start && h.number <= end);
     return c.json({
       book: bookId,
@@ -855,17 +855,16 @@ app.get("/books/:book", async (c) => {
     if (isNaN(page) || isNaN(limit) || page < 1 || limit < 1 || limit > 100) {
       return c.json({ error: "page >=1 dan limit 1-100" }, 400);
     }
-    const startIdx = (page - 1) * limit;
-    const paginated = data.slice(startIdx, startIdx + limit);
+    const { data: paginated, total } = await getBookPage(bookId, page, limit);
     return c.json({
       book: bookId,
       name: book.name,
       pagination: {
         page,
         limit,
-        total: data.length,
-        totalPages: Math.ceil(data.length / limit),
-        hasNext: startIdx + limit < data.length,
+        total,
+        totalPages: Math.ceil(total / limit),
+        hasNext: (page - 1) * limit + limit < total,
         hasPrev: page > 1,
       },
       data: paginated,
@@ -874,18 +873,18 @@ app.get("/books/:book", async (c) => {
 
   // Default: paginated page 1 limit 20
   const defaultLimit = 20;
-  const paginated = data.slice(0, defaultLimit);
+  const { data: paginated, total } = await getBookPage(bookId, 1, defaultLimit);
   return c.json({
     book: bookId,
     name: book.name,
     arabicName: book.arabicName,
-    available: data.length,
+    available: total,
     pagination: {
       page: 1,
       limit: defaultLimit,
-      total: data.length,
-      totalPages: Math.ceil(data.length / defaultLimit),
-      hasNext: data.length > defaultLimit,
+      total,
+      totalPages: Math.ceil(total / defaultLimit),
+      hasNext: total > defaultLimit,
     },
     data: paginated,
   }, 200, cacheHeaders(3600, 86400));

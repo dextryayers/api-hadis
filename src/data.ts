@@ -57,10 +57,57 @@ export async function getBookData(bookIdRaw: string): Promise<Hadith[]> {
   return all;
 }
 
+export async function getBookPage(bookIdRaw: string, page: number, limit: number): Promise<{ data: Hadith[]; total: number }> {
+  const bookId = normalizeBookId(bookIdRaw);
+  const book = BOOKS[bookId];
+  if (!book) throw new Error(`Book not found: ${bookIdRaw}`);
+  const total = book.available;
+  // riyadush/musnad still use full load (small: 372, 1800)
+  if (book.isRiyadush || book.isMusnadSyafii) {
+    const all = await getBookData(bookIdRaw);
+    const start = (page - 1) * limit;
+    return { data: all.slice(start, start + limit), total };
+  }
+  // use chunk: chunk size 100
+  const chunkSize = 100;
+  const startIdx = (page - 1) * limit;
+  const endIdx = startIdx + limit;
+  const startChunk = Math.floor(startIdx / chunkSize) + 1;
+  const endChunk = Math.floor((endIdx - 1) / chunkSize) + 1;
+  const chunks: Hadith[][] = [];
+  for (let c = startChunk; c <= endChunk; c++) {
+    try {
+      const arr = (await fetchJson(`/data/${bookId}/${c}.json`)) as Hadith[];
+      chunks.push(arr);
+    } catch {
+      // fallback to full file if chunk missing
+      const all = await getBookData(bookIdRaw);
+      return { data: all.slice(startIdx, startIdx + limit), total };
+    }
+  }
+  const merged = chunks.flat();
+  const offset = startIdx % chunkSize;
+  // if we fetched 2 chunks, merged length 200, need slice offset
+  return { data: merged.slice(offset, offset + limit), total };
+}
+
 export async function getHadithByNumber(bookIdRaw: string, num: number): Promise<Hadith | undefined> {
   const bookId = normalizeBookId(bookIdRaw);
   const m = idxNum.get(bookId);
   if (m) return m.get(num);
+  // try chunk for non-riyadush: chunk = ceil(num/100)
+  const book = BOOKS[bookId];
+  if (book && !book.isRiyadush && !book.isMusnadSyafii) {
+    const chunk = Math.ceil(num / 100);
+    try {
+      const arr = (await fetchJson(`/data/${bookId}/${chunk}.json`)) as Hadith[];
+      const found = arr.find((h) => h.number === num);
+      if (found) {
+        // warm cache for that chunk
+        return found;
+      }
+    } catch {}
+  }
   const data = await getBookData(bookIdRaw);
   return data.find((h) => h.number === num);
 }
