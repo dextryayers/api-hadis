@@ -767,7 +767,7 @@ app.get("/books", (c) => {
 });
 
 // Search across all books? /search?q=
-app.get("/search", (c) => {
+app.get("/search", async (c) => {
   const q = c.req.query("q");
   if (!q || q.trim().length < 2) {
     return c.json({ error: "query param 'q' minimal 2 karakter" }, 400);
@@ -776,7 +776,7 @@ app.get("/search", (c) => {
   const results: any[] = [];
 
   for (const bookId of BOOK_IDS) {
-    const matched = searchBookData(bookId, q);
+    const matched = await searchBookData(bookId, q);
     for (const h of matched.slice(0, limit)) {
       results.push({ book: bookId, ...h });
       if (results.length >= limit) break;
@@ -792,11 +792,11 @@ app.get("/search", (c) => {
 });
 
 // Random hadith
-app.get("/random", (c) => {
+app.get("/random", async (c) => {
   const bookParamRaw = c.req.query("book");
   const bookParam = bookParamRaw ? normalizeBookId(bookParamRaw) : undefined;
   const bookId = bookParam && BOOKS[bookParam] ? bookParam : BOOK_IDS[Math.floor(Math.random() * BOOK_IDS.length)];
-  const data = getBookData(bookId);
+  const data = await getBookData(bookId);
   const random = data[Math.floor(Math.random() * data.length)];
   return c.json({ book: bookId, data: random }, 200, { "Cache-Control": "no-store" });
 });
@@ -804,7 +804,7 @@ app.get("/random", (c) => {
 // --- Per-book routes ---
 
 // GET /books/:book  -> full or paginated
-app.get("/books/:book", (c) => {
+app.get("/books/:book", async (c) => {
   const bookIdRaw = c.req.param("book");
   const bookId = normalizeBookId(bookIdRaw);
   const book = BOOKS[bookId];
@@ -812,7 +812,7 @@ app.get("/books/:book", (c) => {
     return c.json({ error: `Kitab tidak ditemukan: ${bookIdRaw}`, available: BOOK_IDS }, 404);
   }
 
-  const data = getBookData(bookId);
+  const data = await getBookData(bookId);
 
   // Query handling: range, page/limit, or full
   const range = c.req.query("range"); // e.g. 1-20 or 1,20
@@ -883,13 +883,13 @@ app.get("/books/:book", (c) => {
 });
 
 // GET /books/:book/search?q=
-app.get("/books/:book/search", (c) => {
+app.get("/books/:book/search", async (c) => {
   const bookIdRaw = c.req.param("book");
   const bookId = normalizeBookId(bookIdRaw);
   if (!BOOKS[bookId]) return c.json({ error: `Kitab tidak ditemukan: ${bookIdRaw}` }, 404);
   const q = c.req.query("q");
   if (!q || q.trim().length < 2) return c.json({ error: "query param 'q' minimal 2 karakter" }, 400);
-  const matched = searchBookData(bookId, q);
+  const matched = await searchBookData(bookId, q);
   const limit = Math.min(parseInt(c.req.query("limit") || "20"), 100);
   const page = parseInt(c.req.query("page") || "1");
   const start = (page - 1) * limit;
@@ -903,24 +903,24 @@ app.get("/books/:book/search", (c) => {
 });
 
 // GET /books/:book/random
-app.get("/books/:book/random", (c) => {
+app.get("/books/:book/random", async (c) => {
   const bookIdRaw = c.req.param("book");
   const bookId = normalizeBookId(bookIdRaw);
   if (!BOOKS[bookId]) return c.json({ error: `Kitab tidak ditemukan: ${bookIdRaw}` }, 404);
-  const data = getBookData(bookId);
+  const data = await getBookData(bookId);
   const random = data[Math.floor(Math.random() * data.length)];
   return c.json({ book: bookId, data: random }, 200, { "Cache-Control": "no-store" });
 });
 
 // GET /books/:book/:number  -> single hadith
-app.get("/books/:book/:number", (c) => {
+app.get("/books/:book/:number", async (c) => {
   const bookIdRaw = c.req.param("book");
   const bookId = normalizeBookId(bookIdRaw);
   const numStr = c.req.param("number");
   if (!BOOKS[bookId]) return c.json({ error: `Kitab tidak ditemukan: ${bookIdRaw}` }, 404);
   const num = parseInt(numStr);
   if (isNaN(num)) return c.json({ error: "number harus angka" }, 400);
-  const hadith = getHadithByNumber(bookId, num);
+  const hadith = await getHadithByNumber(bookId, num);
   if (!hadith) return c.json({ error: `Hadis no ${num} tidak ditemukan di ${bookId}` }, 404);
   return c.json({ book: bookId, data: hadith }, 200, cacheHeaders(86400));
 });
