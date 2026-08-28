@@ -15,11 +15,11 @@
   },
   "dependencies": {
     "@hono/node-server": "^2.1.1",
-    "@types/node": "^22.20.1",
     "hono": "^4.13.5",
-    "typescript": "^7.0.2"
+    "typescript": "5.8"
   },
   "devDependencies": {
+    "@types/node": "^22.20.1",
     "tsx": "^4.23.12"
   }
 }
