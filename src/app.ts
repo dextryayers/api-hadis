@@ -23,7 +23,7 @@ function cacheHeaders(maxAge: number, stale?: number): Record<string, string> {
 
 // Root info - lengkap + By Hanif (HTML untuk browser, JSON untuk API)
 app.get("/", (c) => {
-  const baseUrl = "https://api-hadith.vercel.app";
+  const baseUrl = "https://hadisbooks.vercel.app";
   const accept = c.req.header("accept") || "";
   const wantsHtml = accept.includes("text/html");
 
@@ -176,7 +176,7 @@ app.get("/", (c) => {
       github: "https://github.com/dextryayers",
       data_source: "9 file JSON lokal (Kutubut Tis'ah)",
     },
-    deployed_on: "Vercel - https://api-hadith.vercel.app",
+    deployed_on: "Vercel - https://hadisbooks.vercel.app",
   };
 
   if (wantsHtml) {
@@ -322,7 +322,7 @@ app.get("/", (c) => {
 <body>
 <header>
   <div class="wrap header-inner">
-    <div class="brand">API Hadis <small>11 kitab • https://api-hadith.vercel.app • By Hanif Abdurrohim</small></div>
+    <div class="brand">API Hadis <small>11 kitab • https://hadisbooks.vercel.app • By Hanif Abdurrohim</small></div>
     <nav class="nav">
       <a href="#quick">Quick start</a>
       <a href="#kitab">Kitab</a>
@@ -346,8 +346,8 @@ app.get("/", (c) => {
         <span class="chip dark">Vercel Ready</span>
       </div>
       <div class="card" style="margin-top:16px; display:flex; gap:10px; align-items:center; flex-wrap:wrap">
-        <code style="flex:1" class="mono">GET https://api-hadith.vercel.app/books/bukhari/1</code>
-        <a class="btn primary" href="https://api-hadith.vercel.app/books/bukhari/1" target="_blank">Coba</a>
+        <code style="flex:1" class="mono">GET https://hadisbooks.vercel.app/books/bukhari/1</code>
+        <a class="btn primary" href="https://hadisbooks.vercel.app/books/bukhari/1" target="_blank">Coba</a>
         <a class="btn ghost" href="#tester">Buka tester</a>
       </div>
     </div>
@@ -358,7 +358,7 @@ app.get("/", (c) => {
         <div><div style="font-size:11px; color:var(--muted)">Kitab</div><div style="font-weight:800; font-size:22px">${payload.available_books.length}</div><div style="font-size:11px; color:var(--muted)">11 kitab</div></div>
       </div>
       <div style="margin-top:12px; font-size:11px; color:var(--muted)">Base URL produksi</div>
-      <code class="mono">https://api-hadith.vercel.app</code>
+      <code class="mono">https://hadisbooks.vercel.app</code>
       <div style="margin-top:12px" class="callout info"><b>Untuk pemula:</b> Kirim request GET lewat URL, server balas JSON. Tidak perlu login. Cukup fetch atau curl.</div>
     </div>
   </section>
@@ -368,18 +368,18 @@ app.get("/", (c) => {
     <div class="grid2">
       <div class="card">
         <h3>Langkah 1: Lihat daftar kitab</h3>
-        <pre><code>curl https://api-hadith.vercel.app/books</code></pre>
+        <pre><code>curl https://hadisbooks.vercel.app/books</code></pre>
         <p style="font-size:12px; color:var(--muted)">Dapat 11 ID kitab yang bisa dipakai di endpoint lain.</p>
       </div>
       <div class="card">
         <h3>Langkah 2: Ambil satu hadis</h3>
-        <pre><code>curl https://api-hadith.vercel.app/books/bukhari/1</code></pre>
+        <pre><code>curl https://hadisbooks.vercel.app/books/bukhari/1</code></pre>
         <p style="font-size:12px; color:var(--muted)">Ganti bukhari dengan muslim, musnad-syafii, atau riyadush-shalihin.</p>
       </div>
     </div>
     <div class="card" style="margin-top:12px">
       <h3>Langkah 3: Cari hadis</h3>
-      <pre><code>curl "https://api-hadith.vercel.app/books/bukhari/search?q=wudhu&limit=5"</code></pre>
+      <pre><code>curl "https://hadisbooks.vercel.app/books/bukhari/search?q=wudhu&limit=5"</code></pre>
       <p style="font-size:12px; color:var(--muted)">Cari di semua kitab pakai <code>/search?q=puasa</code>. Tidak perlu API key, CORS sudah aktif.</p>
     </div>
   </section>
@@ -466,7 +466,7 @@ GET /books/riyadush-shalihin?range=7-7</code></pre>
 
   <section id="tester">
     <h2><span class="num">8</span> Live tester</h2>
-    <p style="font-size:13px; color:var(--muted)">Satu tester untuk semua route. Pilih endpoint, isi parameter, klik GET. Hasil real dari <code>https://api-hadith.vercel.app</code>.</p>
+    <p style="font-size:13px; color:var(--muted)">Satu tester untuk semua route. Pilih endpoint, isi parameter, klik GET. Hasil real dari <code>https://hadisbooks.vercel.app</code>.</p>
     <div class="tester">
       <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:end">
         <div style="flex:1; min-width:220px">
@@ -531,9 +531,9 @@ GET /books/riyadush-shalihin?range=7-7</code></pre>
 
       <div style="margin-top:12px; background:#f8fafc; border:1px solid var(--border); border-radius:10px; padding:10px; display:flex; gap:8px; flex-wrap:wrap; align-items:center">
         <span style="font-size:11px; font-weight:800; color:var(--teal); background:white; border:1px solid #99f6e4; padding:3px 8px; border-radius:6px">GET</span>
-        <code id="u-preview" style="flex:1; word-break:break-all; background:transparent; border:none; padding:0; font-size:12px; color:var(--slate)" class="mono">https://api-hadith.vercel.app/books/bukhari?page=1&limit=5</code>
+        <code id="u-preview" style="flex:1; word-break:break-all; background:transparent; border:none; padding:0; font-size:12px; color:var(--slate)" class="mono">https://hadisbooks.vercel.app/books/bukhari?page=1&limit=5</code>
         <button onclick="copyUrl()" style="background:white; border:1px solid var(--border); padding:6px 12px; border-radius:8px; cursor:pointer; font-size:11px; font-weight:700">Copy</button>
-        <a id="u-open" href="https://api-hadith.vercel.app/books/bukhari?page=1&limit=5" target="_blank" style="font-size:11px; background:var(--teal); color:white; padding:6px 12px; border-radius:8px; text-decoration:none; font-weight:700">Buka</a>
+        <a id="u-open" href="https://hadisbooks.vercel.app/books/bukhari?page=1&limit=5" target="_blank" style="font-size:11px; background:var(--teal); color:white; padding:6px 12px; border-radius:8px; text-decoration:none; font-weight:700">Buka</a>
       </div>
 
       <div style="display:flex; gap:8px; margin-top:12px; align-items:center; flex-wrap:wrap">
@@ -555,7 +555,7 @@ GET /books/riyadush-shalihin?range=7-7</code></pre>
 </div>
 
 <script>
-const API = "https://api-hadith.vercel.app";
+const API = "https://hadisbooks.vercel.app";
 let lastJson = null;
 function onEndpointChange(){
   const ep = document.getElementById('u-endpoint').value;
@@ -740,7 +740,7 @@ window.addEventListener('load', ()=>{ onEndpointChange(); setTimeout(testUnivers
 <footer>
   <p>© ${new Date().getFullYear()} By <strong>Hanif Abdurrohim</strong> • Dibuat dengan Hono dan TypeScript • Deploy di Vercel • <a href="https://github.com/dextryayers" target="_blank">GitHub @dextryayers</a></p>
   <p style="font-size:11px">Data 11 kitab dari folder assets • Field arab dan id • Gratis, tanpa API key, CORS aktif</p>
-  <p><a href="https://api-hadith.vercel.app/books" target="_blank">Lihat /books JSON</a> • <a href="https://api-hadith.vercel.app/books/bukhari/1" target="_blank">Contoh hadis</a> • <a href="https://github.com/dextryayers" target="_blank">GitHub</a></p>
+  <p><a href="https://hadisbooks.vercel.app/books" target="_blank">Lihat /books JSON</a> • <a href="https://hadisbooks.vercel.app/books/bukhari/1" target="_blank">Contoh hadis</a> • <a href="https://github.com/dextryayers" target="_blank">GitHub</a></p>
 </footer>
 </div>
 </body>
