@@ -68,8 +68,8 @@ export async function getBookPage(bookIdRaw: string, page: number, limit: number
     const start = (page - 1) * limit;
     return { data: all.slice(start, start + limit), total };
   }
-  // use chunk: chunk size 100
-  const chunkSize = 100;
+  // use chunk: 50 for bukhari/muslim (large), 100 for others
+  const chunkSize = (bookId === "bukhari" || bookId === "muslim") ? 50 : 100;
   const startIdx = (page - 1) * limit;
   const endIdx = startIdx + limit;
   const startChunk = Math.floor(startIdx / chunkSize) + 1;
@@ -95,10 +95,11 @@ export async function getHadithByNumber(bookIdRaw: string, num: number): Promise
   const bookId = normalizeBookId(bookIdRaw);
   const m = idxNum.get(bookId);
   if (m) return m.get(num);
-  // try chunk for non-riyadush: chunk = ceil(num/100)
+  // try chunk for non-riyadush: variable size
   const book = BOOKS[bookId];
   if (book && !book.isRiyadush && !book.isMusnadSyafii) {
-    const chunk = Math.ceil(num / 100);
+    const cs = (bookId === "bukhari" || bookId === "muslim") ? 50 : 100;
+    const chunk = Math.ceil(num / cs);
     try {
       const arr = (await fetchJson(`/data/${bookId}/${chunk}.json`)) as Hadith[];
       const found = arr.find((h) => h.number === num);
