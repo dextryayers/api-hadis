@@ -871,22 +871,14 @@ app.get("/books/:book", async (c) => {
     }, 200, cacheHeaders(3600, 86400));
   }
 
-  // Default: paginated page 1 limit 20
-  const defaultLimit = 20;
-  const { data: paginated, total } = await getBookPage(bookId, 1, defaultLimit);
+  // Default: full data (tanpa paginasi) - user minta tampil lengkap
+  const all = await getBookData(bookId);
   return c.json({
     book: bookId,
     name: book.name,
     arabicName: book.arabicName,
-    available: total,
-    pagination: {
-      page: 1,
-      limit: defaultLimit,
-      total,
-      totalPages: Math.ceil(total / defaultLimit),
-      hasNext: total > defaultLimit,
-    },
-    data: paginated,
+    available: all.length,
+    data: all,
   }, 200, cacheHeaders(3600, 86400));
 });
 

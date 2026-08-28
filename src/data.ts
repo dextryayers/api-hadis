@@ -51,7 +51,17 @@ export async function getBookData(bookIdRaw: string): Promise<Hadith[]> {
     for (const arr of parts as any[][]) for (const it of arr as any[]) all.push({ number: it.id, arab: (it.arab || "").trim(), id: stripHtml((it.terjemah || "").trim()), html: (it.terjemah || "").trim() });
     all.sort((a, b) => a.number - b.number);
   } else {
-    all = (await fetchJson(`/data/${book.file}`)) as Hadith[];
+    // chunked for full: batch 10 parallel to stay <10s edge
+    const total = book.available;
+    const cs = (bookId === "bukhari" || bookId === "muslim") ? 50 : 100;
+    const pages = Math.ceil(total / cs);
+    all = [];
+    for (let i = 0; i < pages; i += 10) {
+      const batch = Array.from({ length: Math.min(10, pages - i) }, (_, k) => fetchJson(`/data/${bookId}/${i + k + 1}.json`).catch(() => [] as Hadith[]));
+      const chunks = await Promise.all(batch);
+      for (const ch of chunks) all.push(...(ch as Hadith[]));
+    }
+    if (all.length === 0) all = (await fetchJson(`/data/${book.file}`)) as Hadith[];
   }
   buildNumIdx(bookId, bookIdRaw, all);
   return all;
